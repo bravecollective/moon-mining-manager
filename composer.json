@@ -14,8 +14,9 @@
         "frontpack/composer-assets-plugin": "^0.11.0",
         "ixudra/curl": "^6.13",
         "jdavidbakr/replaceable-model": "^1.0",
-        "laravel/framework": "5.8.*",
-        "laravel/socialite": "^3.0",
+        "laravel/framework": "^6.0",
+        "laravel/helpers": "^1.6",
+        "laravel/socialite": "^5.0",
         "laravel/tinker": "~1.0"
     },
     "require-dev": {
