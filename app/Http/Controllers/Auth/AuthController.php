@@ -14,11 +14,10 @@ use Symfony\Component\HttpFoundation\Response;
 class AuthController extends Controller
 {
 
-    private $socialite_driver;
+    private $socialite_driver = 'eve-sso';
 
     public function __construct()
     {
-        $this->socialite_driver = 'eve-sso';
     }
 
     /**
