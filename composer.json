@@ -21,12 +21,10 @@
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.5",
         "doctrine/dbal": "^3.0",
-        "driftingly/rector-laravel": "^0.24.0",
         "filp/whoops": "^2.0",
         "fzaninotto/faker": "^1.4",
         "mockery/mockery": "^1.0",
-        "phpunit/phpunit": "^9.0",
-        "rector/rector": "^0.18.0"
+        "phpunit/phpunit": "^9.0"
     },
     "repositories": [
         { "type": "git", "url": "https://github.com/bravecollective/web-ui.git" }
