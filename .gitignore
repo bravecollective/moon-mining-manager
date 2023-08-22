@@ -36,3 +36,6 @@ _ide_helper.php
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# VS COde
+.vscode/*
