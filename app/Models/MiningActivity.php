@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use jdavidbakr\ReplaceableModel\ReplaceableModel;
+//use jdavidbakr\ReplaceableModel\ReplaceableModel;
 
 /**
  * App\Models\MiningActivity
@@ -40,7 +40,7 @@ class MiningActivity extends Model
 {
 
     // Allow for using insertIgnore calls on this model.
-    use ReplaceableModel;
+    //use ReplaceableModel;
     
     protected $table = 'mining_activities';
 
