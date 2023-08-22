@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eb2bd4805dc31700930e61536f5211e5",
+    "content-hash": "28382d4725b715da6c210a83880c4a48",
     "packages": [
         {
             "name": "bravecollective/web-ui",
