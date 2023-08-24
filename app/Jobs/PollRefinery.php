@@ -133,7 +133,8 @@ class PollRefinery implements ShouldQueue
         }
 
         // Insert all of the new mining activity records to the database.
-        MiningActivity::insertIgnore($new_mining_activity_records);
+        //MiningActivity::insertIgnore($new_mining_activity_records);
+        $ins = MiningActivity::insertOrIgnore($new_mining_activity_records);
 
         Log::info(
             'PollRefinery: inserted up to ' . count($new_mining_activity_records) . ' new mining activity records'
