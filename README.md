@@ -28,6 +28,9 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 * Now exit the container shell via `exit`
 * Regenerate js/css with `npm run production`, if they have changed.
 
+> If you wish, there is a `docker-compose.override.yml.example` file included. You can rename it to
+> `docker-compose.override.yml` to use a containerized database.
+
 See also https://laravel.com/docs/5.5/installation.
 
 ### EVE tables
