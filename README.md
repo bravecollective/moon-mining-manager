@@ -17,12 +17,15 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 * A MySQL/MariaDB database
 
 ## Installation instructions
-
-* Run `composer install` to install backend dependencies
-* Run `npm install` to install frontend dependencies
+* Start the dev containers: `docker-compose up -d`
+* Run `npm install` to install frontend dependencies locally
 * Rename the `.env.example` file to `.env` and adjust values.
+* Import the suggested files from `EVE Tables` below.
+* Shell into the PHP container via `docker-compose exec moon_php sh`
+* Run `composer install` to install backend dependencies
 * Run `php artisan key:generate`.
 * Run `php artisan migrate` to create the database tables
+* Now exit the container shell via `exit`
 * Regenerate js/css with `npm run production`, if they have changed.
 
 See also https://laravel.com/docs/5.5/installation.
