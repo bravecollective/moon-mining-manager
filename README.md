@@ -4,7 +4,7 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 
 ## Requirements
 
-* PHP >=7.1, <8
+* PHP >=8.1
 * MySQL 8 or MariaDB (tested with 10.6)
 * An [EVE app](https://developers.eveonline.com) with the following scopes:
   - esi-mail.send_mail.v1
@@ -33,7 +33,7 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 * Run `php artisan migrate` to create the database tables.
 * Regenerate js/css with `npm run production`, if they have changed.
 
-See also https://laravel.com/docs/5.5/installation.
+See also https://laravel.com/docs/10.x/installation.
 
 ### Development Environment
 
@@ -59,9 +59,9 @@ You can use Docker to run the app.
 ## Operation instructions
 
 * Run `php artisan queue:work` to start the job queue process. See the
-  [Laravel documentation on Queues](https://laravel.com/docs/5.5/queues) for more information on how to use
+  [Laravel documentation on Queues](https://laravel.com/docs/10.x/queues) for more information on how to use
   Supervisor to manage job queues.
-* Add a Cron for the [Task Scheduler](https://laravel.com/docs/5.5/scheduling)
+* Add a Cron for the [Task Scheduler](https://laravel.com/docs/10.x/scheduling)
 
 ## Further Configuration
 
