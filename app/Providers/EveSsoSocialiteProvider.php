@@ -62,7 +62,7 @@ class EveSsoSocialiteProvider extends AbstractProvider implements ProviderInterf
             'id' => $user['CharacterID'],
             'name' => $user['CharacterName'],
             'owner_hash' => $user['CharacterOwnerHash'],
-            'avatar' => 'https://image.eveonline.com/Character/' . $user['CharacterID'] . '_128.jpg',
+            'avatar' => 'https://images.evetech.net/characters/'. $user['CharacterID'] .'/portrait?size=128'
         ]);
     }
 

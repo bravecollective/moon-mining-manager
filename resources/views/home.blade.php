@@ -23,7 +23,7 @@
             <div class="col-4">
                 <div class="card-heading">Top Refinery</div>
                 @include('common.card', [
-                    'avatar' => 'https://imageserver.eveonline.com/Render/35835_128.png',
+                    'avatar' => ' https://images.evetech.net/Render/35835_128.png',
                     'name' => $top_refinery->name,
                     'sub' => $top_refinery->system ? $top_refinery->system->solarSystemName : null,
                     'amount' => $top_refinery->income
@@ -35,7 +35,7 @@
             <div class="col-4">
                 <div class="card-heading">Top System</div>
                 @include('common.card', [
-                    'avatar' => 'https://imageserver.eveonline.com/Type/3802_64.png',
+                    'avatar' => 'https://images.evetech.net/Type/3802_64.png',
                     'name' => $top_system->solarSystemName,
                     'sub' => $top_system->region->regionName,
                     'amount' => $top_system->total
