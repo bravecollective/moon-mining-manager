@@ -1,6 +1,3 @@
-# docker-compose exec moon_php /bin/sh
-# docker-compose run moon_node /bin/sh
-
 version: '3'
 
 services:

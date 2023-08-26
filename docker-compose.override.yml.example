@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  moon_php:
+    networks:
+      - brave
+  moon_node:
+    networks:
+      - brave
+  moon_http:
+    networks:
+      - brave
+
+  db:
+    image: mysql:8
+    ports:
+      - 3306:3306
+    restart: always
+    environment:
+      MYSQL_DATABASE: moon_mining_manager
+      MYSQL_USER: moon_mining_manager
+      MYSQL_PASSWORD: examplepass
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - db:/var/lib/mysql
+    networks:
+      - brave
+
+volumes:
+  db:
+
+networks:
+  brave:

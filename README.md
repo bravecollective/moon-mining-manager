@@ -5,7 +5,7 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 ## Requirements
 
 * PHP >=7.1, <8
-* MySQL
+* MySQL 8 or MariaDB (tested with 10.6)
 * An [EVE app](https://developers.eveonline.com) with the following scopes:
   - esi-mail.send_mail.v1
   - esi-universe.read_structures.v1
@@ -16,27 +16,35 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
     Callback URL: https://your.domain.tld/callback
 * A MySQL/MariaDB database
 
-## Installation instructions
+## Installation Instructions
 
-* Run `composer install` to install backend dependencies
-* Run `npm install` to install frontend dependencies
+* Create a database for the application.
+* You will need to import the following EVE dump tables into your database. They can be downloaded from
+  [Fuzzworks](https://www.fuzzwork.co.uk/dump/latest/).
+  * invTypes
+  * invTypeMaterials
+  * invUniqueNames
+  * mapSolarSystems
+  * mapRegions
+* Run `npm install` to install frontend dependencies.
 * Rename the `.env.example` file to `.env` and adjust values.
+* Run `composer install` to install backend dependencies.
 * Run `php artisan key:generate`.
-* Run `php artisan migrate` to create the database tables
+* Run `php artisan migrate` to create the database tables.
 * Regenerate js/css with `npm run production`, if they have changed.
 
 See also https://laravel.com/docs/5.5/installation.
 
-### EVE tables
+### Development Environment
 
-You will need to import the following EVE dump tables into your database. They can be downloaded from
-[Fuzzworks](https://www.fuzzwork.co.uk/dump/latest/).
+You can use Docker to run the app.
 
-* invTypes
-* invTypeMaterials
-* invUniqueNames
-* mapSolarSystems
-* mapRegions
+* Start the dev containers: `docker-compose up`.
+* Shell into the PHP container via `docker-compose exec moon_php /bin/sh`.
+* Shell into the Node.js container via `docker-compose run moon_node /bin/sh`.
+
+> If you wish, there is a `docker-compose.override.yml.example` file included. You can rename it to
+> `docker-compose.override.yml` to use a containerized database.
 
 ## Initial setup
 
@@ -71,7 +79,7 @@ Only updates that require work are listed here at the moment.
 ### 2021-12-20
 
 - Added esi-characters.read_notifications.v1 scope to admin login - add this to your EVE app.
-- Added invUniqueNames table with data from Fuzzworks - see [EVE tables](#eve-tables).
+- Added `invUniqueNames` table with data from Fuzzworks - see [Installation Instructions](#installation-instructions).
 
 ## License
 
