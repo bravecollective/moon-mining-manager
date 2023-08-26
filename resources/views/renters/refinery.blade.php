@@ -9,7 +9,7 @@
         <div class="col-4">
             <div class="card-heading">Refinery</div>
             @include('common.card', [
-                'avatar' => 'https://images.evetech.net/Render/35835_128.png',
+                'avatar' => 'https://images.evetech.net/types/35835/render?size=128',
                 'name' => $refinery->name,
                 'sub' => $renter ?
                     'P' . $renter->moon->planet . '-M' .

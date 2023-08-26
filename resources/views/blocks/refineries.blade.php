@@ -10,7 +10,7 @@
         @include('common.card', [
             'link' => '/renters/refinery/' . $refinery->observer_id,
             'size' => 'small',
-            'avatar' => 'https://images.evetech.net/Render/35835_128.png',
+            'avatar' => 'https://images.evetech.net/types/35835/render?size=128',
             'name' => $refinery->name,
             'amount' => $refinery->income,
             'is_active' => $refinery->extraction_start_time,
