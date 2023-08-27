@@ -46,6 +46,25 @@ You can use Docker to run the app.
 > If you wish, there is a `docker-compose.override.yml.example` file included. You can rename it to
 > `docker-compose.override.yml` to use a containerized database.
 
+Generate files and annotations with the IDE Helper for Laravel:
+```
+php artisan ide-helper:generate
+php artisan ide-helper:meta
+php artisan ide-helper:models
+```
+
+Run the queue:
+```
+php artisan schedule:run
+php artisan queue:work
+```
+
+To run a single job use, e.g.:  
+(Simply add constructor arguments after the class name.)
+```
+php artisan command:run-job PollStructures 2113076059
+```
+
 ## Initial setup
 
 - Add your admin user to the table `whitelist` with `is_admin` = `1`. They can now log in and authorise other users.
