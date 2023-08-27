@@ -41,6 +41,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Type whereTypeID($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Type whereTypeName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Type whereVolume($value)
+ * @property-read int|null $type_materials_count
  * @mixin \Eloquent
  */
 class Type extends Model

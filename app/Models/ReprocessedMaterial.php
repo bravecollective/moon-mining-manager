@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ReprocessedMaterial whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ReprocessedMaterial whereMaterialTypeID($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ReprocessedMaterial whereUpdatedAt($value)
+ * @property-read int|null $history_count
  * @mixin \Eloquent
  */
 class ReprocessedMaterial extends Model

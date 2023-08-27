@@ -29,6 +29,9 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\RentalPayment whereRefineryId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\RentalPayment whereRenterId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\RentalPayment whereUpdatedAt($value)
+ * @property-read \App\Models\Moon|null $moon
+ * @property-read \App\Models\Renter|null $renter
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalPayment whereMoonId($value)
  * @mixin \Eloquent
  */
 class RentalPayment extends Model

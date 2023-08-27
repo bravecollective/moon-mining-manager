@@ -65,6 +65,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\SolarSystem whereZ($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\SolarSystem whereZMax($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\SolarSystem whereZMin($value)
+ * @property-read int|null $moons_count
+ * @property-read int|null $refinery_count
  * @mixin \Eloquent
  */
 class SolarSystem extends Model

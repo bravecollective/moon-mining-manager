@@ -58,6 +58,12 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Moon whereRenterId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Moon whereSolarSystemId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Moon whereUpdatedAt($value)
+ * @property int $available
+ * @property-read int|null $renter_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Moon whereAvailable($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Moon whereMonthlyCorpRentalFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Moon wherePreviousMonthlyCorpRentalFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Moon whereStatusFlag($value)
  * @mixin \Eloquent
  */
 class Moon extends Model

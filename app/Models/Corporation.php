@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Corporation whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Corporation whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Corporation whereUpdatedAt($value)
+ * @property-read int|null $refinery_count
  * @mixin \Eloquent
  */
 class Corporation extends Model

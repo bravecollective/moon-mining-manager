@@ -38,6 +38,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Region whereZ($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Region whereZMax($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Region whereZMin($value)
+ * @property int|null $nebula
+ * @property-read int|null $moons_count
+ * @property-read int|null $systems_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Region whereNebula($value)
  * @mixin \Eloquent
  */
 class Region extends Model

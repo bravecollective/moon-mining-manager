@@ -38,6 +38,9 @@ use Illuminate\Support\Facades\DB;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Miner whereUpdatedAt($value)
+ * @property-read int|null $invoices_count
+ * @property-read int|null $mining_activity_count
+ * @property-read int|null $payments_count
  * @mixin \Eloquent
  */
 class Miner extends Model

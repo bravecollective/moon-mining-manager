@@ -42,6 +42,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Renter whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Renter whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Renter whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Renter whereCharacterName($value)
  * @mixin \Eloquent
  */
 class Renter extends Model

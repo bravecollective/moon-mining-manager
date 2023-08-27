@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TaxRate whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TaxRate whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TaxRate whereValue($value)
+ * @property-read int|null $reprocessed_materials_count
  * @mixin \Eloquent
  */
 class TaxRate extends Model

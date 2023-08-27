@@ -46,6 +46,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Refinery whereObserverType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Refinery whereSolarSystemId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Refinery whereUpdatedAt($value)
+ * @property-read int|null $mining_activity_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Refinery whereAvailable($value)
  * @mixin \Eloquent
  */
 class Refinery extends Model
