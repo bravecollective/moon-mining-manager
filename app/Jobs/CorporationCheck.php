@@ -55,6 +55,9 @@ class CorporationCheck implements ShouldQueue
                 'character_id' => $this->miner_id,
             ]);
         } catch (\Exception $e) {
+            // when a character is deleted it goes to doomheim,
+            // after a time that character is purged. this removes
+            // purged characters
             if ($e->getCode() === 404) {
                 Log::error(''. $this->miner_id .' no longer exists and will be deleted.');
                 $miner->delete();
@@ -66,6 +69,13 @@ class CorporationCheck implements ShouldQueue
             intval($this-> miner_id)
         ])->invoke('post', '/characters/affiliation/');
         $affiliations = current($req->getArrayCopy());
+
+        // most characters live in doomheim when they are deleted
+        if ($affiliations->corporation_id === "1000001") {
+            Log::info("". $this->miner_id ." is in Doomheim, purging.");
+            $miner->delete();
+            return;
+        }
 
         // Retrieve all of the relevant details for the corporation.
         $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
