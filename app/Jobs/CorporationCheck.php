@@ -49,9 +49,18 @@ class CorporationCheck implements ShouldQueue
 
         Log::info('CorporationCheck: checking miner ' . $this->miner_id);
 
-        $character = $conn->invoke('get', '/characters/{character_id}/', [
-            'character_id' => $this->miner_id,
-        ]);
+        try {
+            // make sure miner exists
+            $conn->invoke('get', '/characters/{character_id}/', [
+                'character_id' => $this->miner_id,
+            ]);
+        } catch (\Exception $e) {
+            if ($e->getCode() === 404) {
+                Log::error(''. $this->miner_id .' no longer exists and will be deleted.');
+                $miner->delete();
+                return; // short circuit this routine
+            }
+        }
 
         $req = $conn->setBody([
             intval($this-> miner_id)
