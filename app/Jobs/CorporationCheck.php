@@ -71,7 +71,7 @@ class CorporationCheck implements ShouldQueue
         $affiliations = current($req->getArrayCopy());
 
         // most characters live in doomheim when they are deleted
-        if ($affiliations->corporation_id === "1000001") {
+        if ($affiliations->corporation_id === 1000001) {
             Log::info("". $this->miner_id ." is in Doomheim, purging.");
             $miner->delete();
             return;
