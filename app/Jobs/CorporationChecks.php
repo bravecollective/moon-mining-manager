@@ -34,7 +34,7 @@ class CorporationChecks implements ShouldQueue
         // break up the miners into pages of 1k results
         $pages = $this->paginateIterable($miners);
 
-        foreach($pages as $page) {
+        foreach ($pages as $page) {
             // we need an array of id ints
             $ids = array_map(fn($miner) => intval($miner->eve_id), $page);
 

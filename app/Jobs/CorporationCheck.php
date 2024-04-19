@@ -44,20 +44,24 @@ class CorporationCheck implements ShouldQueue
     public function handle()
     {
         // batch those ids into a single request
-        $affiliations = $this->conn->setBody($this->ids)->invoke('post', '/characters/affiliation/');
+        $affiliations = $this->conn->setBody([intval($this->ids)])->invoke('post', '/characters/affiliation/');
 
-        $uniq_corporations = $this->reduceCorporations($affiliations);
+        $uniq_corporations = $this->reduceCorporations($affiliations->getArrayCopy());
 
         // make all corporation requests at once to save unneeded re-fetching
-        $corporations = array_map(function ($corp_id) {
-            return [
-                $corp_id => $this->conn->invoke('get', '/corporations/{corporation_id}', [
-                    'corporation_id' => $corp_id
-                ])
-            ];
-        }, $uniq_corporations);
+        $corporations = [];
 
-        foreach( $affiliations as $affiliation ) {
+        foreach ($uniq_corporations as $corp) {
+            $corporations[$corp->corporation_id] = $this->conn->invoke(
+                'get',
+                '/corporations/{corporation_id}',
+                [
+                    'corporation_id' => $corp->corporation_id
+                ]
+            );
+        }
+
+        foreach ($affiliations as $affiliation) {
             $id = $affiliation->character_id;
             $corporation_id = $affiliation->corporation_id;
             $corporation = $corporations[$corporation_id];
@@ -73,7 +77,7 @@ class CorporationCheck implements ShouldQueue
 
             // most characters live in doomheim when they are deleted
             if ($affiliation->corporation_id === 1000001) {
-                Log::info("". $id ." is in Doomheim, purging.");
+                Log::info("" . $id . " is in Doomheim, purging.");
 
                 $miner->delete();
 
