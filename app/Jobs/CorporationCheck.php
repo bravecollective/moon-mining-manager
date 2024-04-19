@@ -44,7 +44,7 @@ class CorporationCheck implements ShouldQueue
     public function handle()
     {
         // batch those ids into a single request
-        $affiliations = $this->conn->setBody([intval($this->ids)])->invoke('post', '/characters/affiliation/');
+        $affiliations = $this->conn->setBody($this->ids)->invoke('post', '/characters/affiliation/');
 
         $uniq_corporations = $this->reduceCorporations($affiliations->getArrayCopy());
 

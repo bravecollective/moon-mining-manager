@@ -53,6 +53,7 @@ class SendEvemail implements ShouldQueue
         $conn->invoke('post', '/characters/{character_id}/mail/', [
             'character_id' => $userId,
         ]);
+
         Log::info(
             'SendEvemail: sent evemail to character ' . $this->mail['recipients'][0]['recipient_id'] .
             (count($this->mail['recipients']) > 1 ? ' and ' . (count($this->mail['recipients']) - 1) . ' more.' : '')
@@ -94,7 +95,7 @@ class SendEvemail implements ShouldQueue
                 env('ADMIN_EMAIL'),
                 'Mining Manager rate limiter alert',
                 date('Y-m-d H:i:s') .
-                    ' - SendEvemail: bounceback due to hitting the error rate limiter, dumping email job',
+                ' - SendEvemail: bounceback due to hitting the error rate limiter, dumping email job',
                 'From: ' . env('MAIL_FROM_NAME') . ' <' . env('MAIL_FROM_ADDRESS') . '>'
             );
         } elseif (stristr($exception->getEsiResponse()->error, 'ContactCostNotApproved')) {
@@ -115,8 +116,8 @@ class SendEvemail implements ShouldQueue
             );
         } elseif (stripos($exception->getEsiResponse()->error, 'bad recipient') !== false) {
             Log::info(
-                'SendEvemail: ' . $exception->getEsiResponse()->error . ', dumping email job. ' . 
-                'Recipients: ' . json_encode($this->mail['recipients']) . ', ' . 
+                'SendEvemail: ' . $exception->getEsiResponse()->error . ', dumping email job. ' .
+                'Recipients: ' . json_encode($this->mail['recipients']) . ', ' .
                 'Subject: ' . $this->mail['subject']
             );
         } else {
