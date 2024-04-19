@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\Miner;
 use Carbon\Carbon;
-use App\Classes\EsiConnection;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -32,9 +31,6 @@ class CorporationChecks implements ShouldQueue
 
         $delay_counter = 1;
 
-        $esi = new EsiConnection;
-        $conn = $esi->getConnection();
-
         // break up the miners into pages of 1k results
         $pages = $this->paginateIterable($miners);
 
@@ -42,18 +38,9 @@ class CorporationChecks implements ShouldQueue
             // we need an array of id ints
             $ids = array_map(fn($miner) => intval($miner->eve_id), $page);
 
-            // batch those ids into a single request
-            $affiliations = $conn->setBody($ids)->invoke('post', '/characters/affiliation/');
+            CorporationCheck::dispatch($ids)->delay(Carbon::now()->addSecond(15 * $delay_counter));
 
-            foreach( $affiliations as $affiliation ) {
-                Log::info('CorporationChecks: dispatched job to check the corporation for miner ' .
-                $affiliation->eve_id . ' in ' . (5 * $delay_counter) . ' seconds');
-
-                // spawn a job for each affiliation (basically each found miner)
-                CorporationCheck::dispatch($affiliation)->delay(Carbon::now()->addSecond(15 * $delay_counter));
-
-                $delay_counter++;
-            }
+            $delay_counter++;
         }
     }
 
