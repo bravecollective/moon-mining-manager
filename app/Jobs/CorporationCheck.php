@@ -19,16 +19,16 @@ class CorporationCheck implements ShouldQueue
 
     public $tries = 10;
 
-    private $miner_id;
+    private $affiliation;
 
     /**
      * Create a new job instance.
      *
-     * @param int $id
+     * @param object affiliation
      */
-    public function __construct($id)
+    public function __construct($affiliation)
     {
-        $this->miner_id = $id;
+        $this->affiliation = $affiliation;
     }
 
     /**
@@ -42,74 +42,61 @@ class CorporationCheck implements ShouldQueue
         $esi = new EsiConnection;
         $conn = $esi->getConnection();
 
+        $id = $this->affiliation->character_id;
+        $corporation_id = $this->affiliation->corporation_id;
+
         // Check if the miner already exists.
         /* @var Miner $miner */
-        $miner = Miner::where('eve_id', $this->miner_id)->first();
+        $miner = Miner::where('eve_id', $id)->first();
         $changed = false;
 
-        Log::info('CorporationCheck: checking miner ' . $this->miner_id);
-
-        try {
-            // make sure miner exists
-            $conn->invoke('get', '/characters/{character_id}/', [
-                'character_id' => $this->miner_id,
-            ]);
-        } catch (\Exception $e) {
-            // when a character is deleted it goes to doomheim,
-            // after a time that character is purged. this removes
-            // purged characters
-            if ($e->getCode() === 404) {
-                Log::error(''. $this->miner_id .' no longer exists and will be deleted.');
-                $miner->delete();
-                return; // short circuit this routine
-            }
-        }
-
-        $req = $conn->setBody([
-            intval($this-> miner_id)
-        ])->invoke('post', '/characters/affiliation/');
-        $affiliations = current($req->getArrayCopy());
+        Log::info('CorporationCheck: checking miner ' . $id);
 
         // most characters live in doomheim when they are deleted
-        if ($affiliations->corporation_id === 1000001) {
-            Log::info("". $this->miner_id ." is in Doomheim, purging.");
+        if ($this->affiliation->corporation_id === 1000001) {
+            Log::info("". $id ." is in Doomheim, purging.");
+
             $miner->delete();
+
             return;
         }
 
         // Retrieve all of the relevant details for the corporation.
         $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
-            'corporation_id' => $affiliations->corporation_id,
+            'corporation_id' => $corporation_id,
         ]);
 
         // Check if they are still in the same corporation as last time we checked.
-        if ($miner->corporation_id == $affiliations->corporation_id) {
+        if ($miner->corporation_id == $corporation_id) {
             Log::info(
                 'CorporationCheck: miner ' . $this->miner_id . ' is still in the same corporation ' .
-                $affiliations->corporation_id
+                $corporation_id
             );
         } else {
             // Update the miner's stored corporation ID.
-            $miner->corporation_id = $affiliations->corporation_id;
+            $miner->corporation_id = $corporation_id;
 
             Log::info(
                 'CorporationCheck: miner ' . $this->miner_id . ' has moved to corporation ' .
-                $affiliations->corporation_id
+                $corporation_id
             );
 
             // Check if they have moved to another corporation we know about already.
-            $existing_corporation = Corporation::where('corporation_id', $affiliations->corporation_id)->first();
+            $existing_corporation = Corporation::where('corporation_id', $corporation_id)->first();
+
             if (!isset($existing_corporation)) {
                 $new_corporation = new Corporation;
-                $new_corporation->corporation_id = $affiliations->corporation_id;
+                $new_corporation->corporation_id = $corporation_id;
                 $new_corporation->name = $corporation->name;
                 $new_corporation->save();
+
                 Log::info('CorporationCheck: stored new corporation ' . $corporation->name);
 
                 // Check if their new corporation is a different alliance.
                 if (isset($corporation->alliance_id)) {
                     $miner->alliance_id = $corporation->alliance_id;
                     $existing_alliance = Alliance::where('alliance_id', $corporation->alliance_id)->first();
+
                     if (!isset($existing_alliance)) {
                         // This is a new alliance, save the details.
                         $new_alliance = new Alliance;
@@ -119,6 +106,7 @@ class CorporationCheck implements ShouldQueue
                         ]);
                         $new_alliance->name = $alliance->name;
                         $new_alliance->save();
+
                         Log::info('CorporationCheck: stored new alliance ' . $alliance->name);
                     }
                 }
@@ -131,6 +119,7 @@ class CorporationCheck implements ShouldQueue
         if (isset($corporation->alliance_id) && $miner->alliance_id != $corporation->alliance_id) {
             $miner->alliance_id = $corporation->alliance_id;
             $changed = true;
+
             Log::info(
                 'CorporationCheck: updated alliance ' . $corporation->alliance_id .
                 ' for miner ' . $this->miner_id
