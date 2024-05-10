@@ -26,16 +26,43 @@ class CorporationChecks implements ShouldQueue
         // Grab all of the miner records we have, and loop through them all to queue jobs
         // to check their corporation membership.
         $miners = Miner::all();
+
         Log::info('CorporationChecks: found ' . count($miners) . ' miners in the database');
+
         $delay_counter = 1;
 
-        foreach ($miners as $miner) {
-            CorporationCheck::dispatch($miner->eve_id)->delay(Carbon::now()->addSecond(15 * $delay_counter));
-            Log::info('CorporationChecks: dispatched job to check the corporation for miner ' .
-                $miner->eve_id . ' in ' . (5 * $delay_counter) . ' seconds');
+        // break up the miners into pages of 1k results
+        $pages = $this->paginateIterable($miners);
+
+        foreach ($pages as $page) {
+            // we need an array of id ints
+            $ids = array_map(fn($miner) => intval($miner->eve_id), $page);
+
+            CorporationCheck::dispatch($ids)->delay(Carbon::now()->addSecond(15 * $delay_counter));
+
             $delay_counter++;
         }
+    }
 
+    private function paginateIterable(iterable $iterable, int $pageSize = 1000): iterable
+    {
+        $currentPage = [];
+        $count = 0;
+
+        foreach ($iterable as $item) {
+            $currentPage[] = $item;
+            $count++;
+
+            if ($count === $pageSize) {
+                yield $currentPage;
+                $currentPage = [];
+                $count = 0;
+            }
+        }
+
+        if ($count > 0) {
+            yield $currentPage;
+        }
     }
 
 }
