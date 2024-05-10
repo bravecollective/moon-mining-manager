@@ -46,35 +46,43 @@ class CorporationCheck implements ShouldQueue
         /* @var Miner $miner */
         $miner = Miner::where('eve_id', $this->miner_id)->first();
         $changed = false;
+
         Log::info('CorporationCheck: checking miner ' . $this->miner_id);
+
         $character = $conn->invoke('get', '/characters/{character_id}/', [
             'character_id' => $this->miner_id,
         ]);
 
+        $req = $conn->setBody([
+            intval($this->miner_id)
+        ])->invoke('post', '/characters/affiliation/');
+        $affiliations = current($req->getArrayCopy());
+
         // Retrieve all of the relevant details for the corporation.
         $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
-            'corporation_id' => $character->corporation_id,
+            'corporation_id' => $affiliations->corporation_id,
         ]);
 
         // Check if they are still in the same corporation as last time we checked.
-        if ($miner->corporation_id == $character->corporation_id) {
+        if ($miner->corporation_id == $affiliations->corporation_id) {
             Log::info(
                 'CorporationCheck: miner ' . $this->miner_id . ' is still in the same corporation ' .
-                $character->corporation_id
+                $affiliations->corporation_id
             );
         } else {
             // Update the miner's stored corporation ID.
-            $miner->corporation_id = $character->corporation_id;
+            $miner->corporation_id = $affiliations->corporation_id;
+
             Log::info(
                 'CorporationCheck: miner ' . $this->miner_id . ' has moved to corporation ' .
-                $character->corporation_id
+                $affiliations->corporation_id
             );
 
             // Check if they have moved to another corporation we know about already.
-            $existing_corporation = Corporation::where('corporation_id', $character->corporation_id)->first();
+            $existing_corporation = Corporation::where('corporation_id', $affiliations->corporation_id)->first();
             if (!isset($existing_corporation)) {
                 $new_corporation = new Corporation;
-                $new_corporation->corporation_id = $character->corporation_id;
+                $new_corporation->corporation_id = $affiliations->corporation_id;
                 $new_corporation->name = $corporation->name;
                 $new_corporation->save();
                 Log::info('CorporationCheck: stored new corporation ' . $corporation->name);

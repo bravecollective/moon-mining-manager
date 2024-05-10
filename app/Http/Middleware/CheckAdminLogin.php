@@ -6,6 +6,7 @@ use App\Models\Whitelist;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CheckAdminLogin
 {
@@ -22,23 +23,29 @@ class CheckAdminLogin
         if (!Auth::check()) {
             return redirect()->route('login');
         }
+
         $user = Auth::user();
         $whitelist = Whitelist::where([
             ['eve_id', $user->eve_id],
             ['is_admin', TRUE],
         ])->first();
+
+        Log::info($whitelist);
+
         if (!isset($whitelist)) {
             // Not an admin, check if they are a whitelisted manager.
             $whitelist = Whitelist::where([
                 ['eve_id', $user->eve_id],
                 ['is_admin', FALSE],
             ])->first();
+
             if (isset($whitelist)) {
                 return redirect('/timers');
             } else {
                 return redirect()->route('login');
             }
         }
+
         return $next($request);
     }
 }

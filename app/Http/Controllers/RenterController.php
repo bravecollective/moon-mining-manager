@@ -77,6 +77,8 @@ class RenterController extends Controller
             $renter->character->avatar = $conn->invoke('get', '/characters/{character_id}/portrait/', [
                 'character_id' => $renter->character_id,
             ]);
+
+            // since this isn't used for checking, only display, I'm ok with stale data
             $renter->character->corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
                 'corporation_id' => $renter->character->corporation_id,
             ]);
@@ -128,6 +130,8 @@ class RenterController extends Controller
         $renter->avatar = $conn->invoke('get', '/characters/{character_id}/portrait/', [
             'character_id' => $id,
         ]);
+
+        // since this isn't used for checking, only display, I'm ok with stale data
         $renter->corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
             'corporation_id' => $renter->corporation_id,
         ]);
@@ -188,6 +192,8 @@ class RenterController extends Controller
             'character_id' => $renter->character_id,
         ]);
         $character->portrait = $portrait->px128x128;
+
+        // since this isn't used for checking, only display, I'm ok with stale data
         $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
             'corporation_id' => $character->corporation_id,
         ]);

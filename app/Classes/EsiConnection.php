@@ -47,10 +47,10 @@ class EsiConnection
     public function getCorporationId($userId)
     {
         // Retrieve the user's character details.
-        $character = $this->getConnection()->invoke('get', '/characters/{character_id}/', [
-            'character_id' => $userId,
-        ]);
-
+        $req = $this->getConnection()->setBody([
+            intval($userId)
+        ])->invoke('post', '/characters/affiliation/');
+        $character = current($req->getArrayCopy());
         return $character->corporation_id;
     }
 

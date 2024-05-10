@@ -64,9 +64,10 @@ class AuthController extends Controller
         $conn = $esi->getConnection();
 
         // Check if the user is a member of the correct alliance.
-        $character = $conn->invoke('get', '/characters/{character_id}/', [
-            'character_id' => $authUser->eve_id,
-        ]);
+        $req = $conn->setBody([
+                intval($authUser->eve_id)
+            ])->invoke('post', '/characters/affiliation/');
+        $character = current($req->getArrayCopy());
 
         // If this is a new login, save the corporation ID.
         if (!isset($authUser->corporation_id)) {
