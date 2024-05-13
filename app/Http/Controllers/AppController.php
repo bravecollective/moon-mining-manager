@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Miner;
 use App\Models\Payment;
 use App\Models\Refinery;
@@ -25,9 +26,12 @@ class AppController extends Controller
      */
     public function home()
     {
+        $three_months_ago = Carbon::now()->subMonths(3);
+
         // Build the WHERE clause to filter by alliance and/or corporation membership.
         $whitelist_where = [];
         $blacklist_where = [];
+
         if (env('EVE_ALLIANCES_WHITELIST')) {
             $whitelist_where[] = 'alliance_id IN (' . env('EVE_ALLIANCES_WHITELIST') . ')';
             $blacklist_where[] = '(alliance_id NOT IN (' . env('EVE_ALLIANCES_WHITELIST') . ') OR alliance_id IS NULL)';
@@ -36,8 +40,10 @@ class AppController extends Controller
             $whitelist_where[] = 'corporation_id IN (' . env('EVE_CORPORATIONS_WHITELIST') . ')';
             $blacklist_where[] = 'corporation_id NOT IN (' . env('EVE_CORPORATIONS_WHITELIST') . ')';
         }
+
         $whitelist_whereRaw = null;
         $blacklist_whereRaw = null;
+
         if (count($whitelist_where)) {
             $whitelist_whereRaw = '(' . implode(' OR ', $whitelist_where) . ')';
             $blacklist_whereRaw = '(' . implode(' AND ', $blacklist_where) . ')';
@@ -55,15 +61,19 @@ class AppController extends Controller
         /* @var Payment $top_payer */
         $top_payer = Payment::select(DB::raw('miner_id, SUM(amount_received) AS total'))
             ->groupBy('miner_id')->orderBy('total', 'desc')->first();
+
         if (isset($top_payer)) {
             $top_miner = Miner::where('eve_id', $top_payer->miner_id)->first();
             /** @noinspection PhpUndefinedFieldInspection */
             $top_miner->total = $top_payer->total;
         }
-        $top_refinery = Refinery::orderBy('income', 'desc')->where('available', 1)->first();
+
+        $top_refinery = Refinery::orderBy('income', 'desc')->where('available', 1)->where('updated_at', '>=', $three_months_ago)->first();
+
         /* @var Refinery $top_refinery_system */
         $top_refinery_system = Refinery::select(DB::raw('solar_system_id, SUM(income) AS total'))
             ->where('available', 1)->groupBy('solar_system_id')->orderBy('total', 'desc')->first();
+
         if (isset($top_refinery_system) && $top_refinery_system->solar_system_id > 0) {
             /* @var SolarSystem $top_system */
             $top_system = SolarSystem::find($top_refinery_system->solar_system_id);
@@ -77,9 +87,9 @@ class AppController extends Controller
             'top_system' => (isset($top_system)) ? $top_system : null,
             'miners' => Miner::where('amount_owed', '>=', 1)->whereRaw($whitelist_whereRaw)
                 ->orderBy('amount_owed', 'desc')->get(),
-            'ninjas' => $blacklist_whereRaw ? Miner::whereRaw($blacklist_whereRaw)->get() : [],
+            'ninjas' => $blacklist_whereRaw ? Miner::whereRaw($blacklist_whereRaw)->limit(100)->get() : [],
             'total_amount_owed' => $total_amount_owed ? $total_amount_owed->total : 0,
-            'refineries' => Refinery::orderBy('income', 'desc')->where('available', 1)->get(),
+            'refineries' => Refinery::orderBy('income', 'desc')->where('available', 1)->where('updated_at', '>=', $three_months_ago)->get(),
             'total_income' => $total_income->total,
         ]);
     }
