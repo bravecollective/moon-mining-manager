@@ -1,0 +1,24 @@
+ul.pagination {
+  display: flex;
+  gap: 12px;
+  list-style: none;
+  justify-content: center;
+
+  a {
+    text-decoration: none;
+    color: $text;
+
+    &:hover {
+      opacity: 0.5;
+    }
+  }
+
+  .disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .active {
+    color: $highlight;
+  }
+}

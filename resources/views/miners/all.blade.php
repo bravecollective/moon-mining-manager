@@ -45,20 +45,20 @@
                     @endforeach
                 </tbody>
             </table>
-            Total: {{ count($miners) }} miners.
+            {{ $miners->links() }}
         </div>
 
     </div>
 
     <script>
-    
+
         window.addEventListener('load', function () {
             $('#miners').tablesorter();
             $('#miners tr').on('click', function () {
                 $(this).find('a')[0].click();
             });
         });
-    
+
     </script>
 
 @endsection
