@@ -4,31 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c14c90d51eac0ef70f78eb41110cbfed",
+  "content-hash": "7cc578e487217aaadd4e309efe3c0f7d",
     "packages": [
-        {
-            "name": "bravecollective/web-ui",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/bravecollective/web-ui.git",
-                "reference": "92d8877358286550a630beac0257042f3c7df82b"
-            },
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "assets-files": [
-                    "dist/images",
-                    "dist/css",
-                    "dist/js",
-                    "dist/pickadate"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "time": "2019-09-29T12:56:32+00:00"
-        },
         {
             "name": "brick/math",
             "version": "0.11.0",
@@ -6202,6 +6179,7 @@
                     "type": "patreon"
                 }
             ],
+          "abandoned": "web-token/jwt-library",
             "time": "2023-05-18T16:20:51+00:00"
         },
         {
@@ -6278,6 +6256,7 @@
                     "type": "patreon"
                 }
             ],
+          "abandoned": "web-token/jwt-library",
             "time": "2023-08-23T09:49:09+00:00"
         },
         {
@@ -6355,6 +6334,7 @@
                     "type": "patreon"
                 }
             ],
+          "abandoned": "web-token/jwt-library",
             "time": "2023-05-18T16:20:51+00:00"
         },
         {
@@ -6425,6 +6405,7 @@
                     "type": "patreon"
                 }
             ],
+          "abandoned": "web-token/jwt-library",
             "time": "2023-05-18T16:20:51+00:00"
         },
         {
@@ -6494,6 +6475,7 @@
                     "type": "patreon"
                 }
             ],
+          "abandoned": "web-token/jwt-library",
             "time": "2023-05-18T16:20:51+00:00"
         },
         {
@@ -6569,6 +6551,7 @@
                     "type": "patreon"
                 }
             ],
+          "abandoned": "web-token/jwt-library",
             "time": "2023-05-18T16:20:51+00:00"
         },
         {
@@ -9415,9 +9398,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "bravecollective/web-ui": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
