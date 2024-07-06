@@ -1,3 +1,4 @@
+---
 stages:
   - build
   - release
@@ -12,7 +13,7 @@ build_job:
     - apt-get install -y git unzip libgmp3-dev
     - docker-php-ext-install pdo_mysql gmp
     - curl -sS https://getcomposer.org/installer | php
-    - php composer.phar install --no-dev
+    - php composer.phar install --no-dev --optimize-autoloader
     - mkdir moon-mining-manager
     - mv app moon-mining-manager/app
     - mv bootstrap moon-mining-manager/bootstrap
@@ -24,14 +25,16 @@ build_job:
     - mv storage moon-mining-manager/storage
     - mv vendor moon-mining-manager/vendor
     - mv .env.example moon-mining-manager/.env.example
-    - mv artisan moon-mining-manager/artisan
     - mv LICENSE moon-mining-manager/LICENSE
     - mv README.md moon-mining-manager/README.md
+    - mv artisan moon-mining-manager/artisan
+    - mv package-lock.json moon-mining-manager/package-lock.json
     - echo "BUILD_JOB_ID=$CI_JOB_ID" > build.env
+    - tar czf moon-mining-manager-$CI_COMMIT_TAG.tar.gz moon-mining-manager/
   artifacts:
     name: 'moon-mining-manager-$CI_COMMIT_TAG'
     paths:
-      - 'moon-mining-manager'
+      - 'moon-mining-manager-$CI_COMMIT_TAG.tar.gz'
     expire_in: never
     reports:
       dotenv: build.env
@@ -53,3 +56,4 @@ release_job:
       links:
         - name: 'moon-mining-manager-$CI_COMMIT_TAG.zip'
           url: '$CI_SERVER_URL/$CI_PROJECT_PATH/-/jobs/$BUILD_JOB_ID/artifacts/download'
+
