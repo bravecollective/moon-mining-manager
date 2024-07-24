@@ -28,6 +28,7 @@ build_job:
         LICENSE
         README.md
         artisan
+        composer.json
     - echo "BUILD_JOB_ID=$CI_JOB_ID" > build.env
   artifacts:
     name: 'moon-mining-manager-$CI_COMMIT_TAG'
