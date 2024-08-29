@@ -31,13 +31,13 @@
                     <div>
                         <label for="type">Type of rental</label>
                         <select id="type" name="type">
-                            <option value="{{\App\Models\Renter::TYPE_INDIVIDUAL}}"
-                                    {{ ($renter->type == \App\Models\Renter::TYPE_INDIVIDUAL) ? ' selected' : '' }}>
-                                Individual
+                            <option value="{{\App\Models\Renter::TYPE_ACTIVE}}"
+                                    {{ ($renter->type == \App\Models\Renter::TYPE_ACTIVE) ? ' selected' : '' }}>
+                                Active
                             </option>
-                            <option value="{{\App\Models\Renter::TYPE_CORPORATION}}"
-                                    {{ ($renter->type == \App\Models\Renter::TYPE_CORPORATION) ? ' selected' : '' }}>
-                                Corporation
+                            <option value="{{\App\Models\Renter::TYPE_PASSIVE}}"
+                                    {{ ($renter->type == \App\Models\Renter::TYPE_PASSIVE) ? ' selected' : '' }}>
+                                Passive
                             </option>
                         </select>
                     </div>

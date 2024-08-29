@@ -273,7 +273,7 @@ class RenterController extends Controller
 
     private function populateDataAndSave(Renter $renter, $request)
     {
-        $renter->type = $request->type == Renter::TYPE_CORPORATION ? Renter::TYPE_CORPORATION : Renter::TYPE_INDIVIDUAL;
+        $renter->type = ($request->type == Renter::TYPE_ACTIVE)? Renter::TYPE_ACTIVE : Renter::TYPE_PASSIVE;
         $renter->character_id = $request->character_id;
         $renter->character_name = $this->getName($renter->character_id);
         $renter->refinery_id = $request->refinery_id;

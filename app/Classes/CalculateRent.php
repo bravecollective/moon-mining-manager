@@ -29,9 +29,9 @@ class CalculateRent
         }
 
         // Save the updated rental fee.
-        if ($contractType === Renter::TYPE_CORPORATION) {
+        if ($contractType === Renter::TYPE_PASSIVE) {
             $moon->monthly_corp_rental_fee = $fee;
-        } else { // Renter::TYPE_INDIVIDUAL
+        } else { // Renter::TYPE_ACTIVE
             $moon->monthly_rental_fee = $fee;
         }
         $moon->save();
@@ -77,8 +77,8 @@ class CalculateRent
                     break;
             }
 
-            // Reduce rent for corporations by 30%
-            $taxRate *= $contractType === Renter::TYPE_CORPORATION ? 0.7 : 1;
+            // Increase rent for passive renters
+            $taxRate *= ($contractType === Renter::TYPE_ACTIVE)? 1 : 1.62;
 
             // Reduce moon value to 70% for rent calculation
             $moonValue = $oreValue * $units * 0.7;

@@ -35,19 +35,19 @@ class CalculateRent implements ShouldQueue
             $moon->previous_monthly_corp_rental_fee = $moon->monthly_corp_rental_fee;
 
             // update - saves the $moon object
-            $fee = $calc->updateMoon($moon, Renter::TYPE_INDIVIDUAL);
-            $corpFee = $calc->updateMoon($moon, Renter::TYPE_CORPORATION);
+            $fee = $calc->updateMoon($moon, Renter::TYPE_ACTIVE);
+            $corpFee = $calc->updateMoon($moon, Renter::TYPE_PASSIVE);
 
             Log::info("CalculateRent: updated stored monthly rental fee for moon $moon->id to $fee/$corpFee");
 
             // Update the monthly rent figure if this moon is currently rented.
             DB::table('renters')
                 ->where('moon_id', $moon->id)
-                ->where('type', Renter::TYPE_INDIVIDUAL)
+                ->where('type', Renter::TYPE_ACTIVE)
                 ->update(['monthly_rental_fee' => $fee]);
             DB::table('renters')
                 ->where('moon_id', $moon->id)
-                ->where('type', Renter::TYPE_CORPORATION)
+                ->where('type', Renter::TYPE_PASSIVE)
                 ->update(['monthly_rental_fee' => $corpFee]);
         }
     }

@@ -36,8 +36,8 @@
                     <th>Mineral #3</th>
                     <th>Mineral #4</th>
                     <th>Total %</th>
-                    <th class="numeric">Rent (Individuals)</th>
-                    <th class="numeric">Rent (Corporations)</th>
+                    <th class="numeric">Rent (Active)</th>
+                    <th class="numeric">Rent (Passive)</th>
                     <th>Status</th>
                 </tr>
             </thead>
