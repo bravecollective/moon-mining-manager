@@ -71,7 +71,7 @@
                                 {{ $moon->active_renter ? $moon->active_renter->character_name : '' }}
                             </td>
                             <td>
-                                {{ $moon->active_renter ? $moon->active_renter->type : '' }}
+                                {{ $moon->active_renter ? ($moon->active_renter->type === 'individual')? 'active' : 'passive' : '' }}
                             </td>
                             <td class="moon-status"
                                 data-moon-id="{{ $moon->id }}"
