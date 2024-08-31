@@ -18,8 +18,8 @@
                         <th>Mineral composition</th>
                         <th>Total %</th>
                         <th class="numeric">
-                            Monthly fee<br>
-                            Corp fee
+                            Active fee<br>
+                            Passive fee
                         </th>
                         <th class="numeric">Last month</th>
                         <th>Renter</th>
