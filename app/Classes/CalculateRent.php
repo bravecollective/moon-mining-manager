@@ -14,6 +14,7 @@ class CalculateRent
 {
     protected $total_ore_volume = 21500000; // 21.5m m3 represents a 30-day mining cycle, approximately.
     protected $r4_discount_value = 50000000; // 50m flat rate discount for moons that are only R4
+    protected $min_moon_rental_price = 30000000; // 30m minimum rental price
 
     public function updateMoon(Moon $moon, $contractType): int
     {
@@ -40,7 +41,7 @@ class CalculateRent
         // Apply a flat 50m discount to rentals if there is only r4 ores in the moon.
         if (count(array_diff($ore_groups, [1884])) === 0) {
           $fee -= $this->r4_discount_value;
-          $fee = max($fee, 0);
+          $fee = max($fee, $this->min_moon_rental_price);
         }
 
         // Save the updated rental fee.
