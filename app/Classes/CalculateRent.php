@@ -13,19 +13,34 @@ use Illuminate\Support\Facades\Log;
 class CalculateRent
 {
     protected $total_ore_volume = 21500000; // 21.5m m3 represents a 30-day mining cycle, approximately.
+    protected $r4_discount_value = 50000000; // 50m flat rate discount for moons that are only R4
 
     public function updateMoon(Moon $moon, $contractType): int
     {
         // Set the monthly rental value to zero.
         $fee = 0;
 
-        $fee += $this->calculateOreTaxValue($moon->mineral_1_type_id, $moon->mineral_1_percent, $contractType);
-        $fee += $this->calculateOreTaxValue($moon->mineral_2_type_id, $moon->mineral_2_percent, $contractType);
+        $type = Type::find($moon->mineral_1_type_id);
+        $ore_groups[] = $type->groupID;
+        $fee += $this->calculateOreTaxValue($type, $moon->mineral_1_percent, $contractType);
+        $type = Type::find($moon->mineral_2_type_id);
+        $ore_groups[] = $type->groupID;
+        $fee += $this->calculateOreTaxValue($type, $moon->mineral_2_percent, $contractType);
         if ($moon->mineral_3_type_id) {
-            $fee += $this->calculateOreTaxValue($moon->mineral_3_type_id, $moon->mineral_3_percent, $contractType);
+            $type = Type::find($moon->mineral_3_type_id);
+            $ore_groups[] = $type->groupID;
+            $fee += $this->calculateOreTaxValue($type, $moon->mineral_3_percent, $contractType);
         }
         if ($moon->mineral_4_type_id) {
-            $fee += $this->calculateOreTaxValue($moon->mineral_4_type_id, $moon->mineral_4_percent, $contractType);
+            $type = Type::find($moon->mineral_4_type_id);
+            $ore_groups[] = $type->groupID;
+            $fee += $this->calculateOreTaxValue($type, $moon->mineral_4_percent, $contractType);
+        }
+
+        // Apply a flat 50m discount to rentals if there is only r4 ores in the moon.
+        if (count(array_diff($ore_groups, [1884])) === 0) {
+          $fee -= $this->r4_discount_value;
+          $fee = max($fee, 0);
         }
 
         // Save the updated rental fee.
@@ -39,10 +54,10 @@ class CalculateRent
         return $fee;
     }
 
-    private function calculateOreTaxValue($type_id, $percent, $contractType): int
+    private function calculateOreTaxValue($type, $percent, $contractType): int
     {
         // Retrieve the value of the mineral from the taxes table.
-        $tax_rate = TaxRate::where('type_id', $type_id)->first();
+        $tax_rate = TaxRate::where('type_id', $type->typeID)->first();
 
         // If we don't have a stored tax rate for this ore type, queue a job to calculate it.
         if (isset($tax_rate)) {
@@ -53,7 +68,6 @@ class CalculateRent
             $oreVolume = $this->total_ore_volume * $percent / 100;
 
             // Based on the volume of the ore type, how many units does that volume represent.
-            $type = Type::find($type_id);
             $units = $oreVolume / $type->volume;
 
             // Base Tax Rate of 5%
@@ -91,14 +105,14 @@ class CalculateRent
         } else {
             // Add a new record for this unknown ore type.
             $tax_rate = new TaxRate;
-            $tax_rate->type_id = $type_id;
+            $tax_rate->type_id = $type->typeID;
             $tax_rate->check_materials = 1;
             $tax_rate->value = 0;
             $tax_rate->tax_rate = 7;
             $tax_rate->updated_by = 0;
             $tax_rate->save();
 
-            Log::info('CalculateRent: unknown ore ' . $type_id . ' found, new tax rate record created');
+            Log::info('CalculateRent: unknown ore ' . $type->typeID . ' found, new tax rate record created');
 
             // Queue the jobs to update the ore values rather than waiting for the next scheduled job.
             UpdateReprocessedMaterials::dispatch();
