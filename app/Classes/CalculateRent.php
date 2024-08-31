@@ -40,7 +40,7 @@ class CalculateRent
         // Apply a flat 50m discount to rentals if there is only r4 ores in the moon.
         if (count(array_diff($ore_groups, [1884])) === 0) {
           $fee -= $this->r4_discount_value;
-          $fee = max($fee, 0)
+          $fee = max($fee, 0);
         }
 
         // Save the updated rental fee.
