@@ -296,8 +296,8 @@ class MoonAdminController extends Controller
         // Grab all of the (available) moons and loop through them.
         $moons = Moon::where('available', 1)->get();
         foreach ($moons as $moon) {
-            $calc->updateMoon($moon, Renter::TYPE_INDIVIDUAL);
-            $calc->updateMoon($moon, Renter::TYPE_CORPORATION);
+            $calc->updateMoon($moon, Renter::TYPE_ACTIVE);
+            $calc->updateMoon($moon, Renter::TYPE_PASSIVE);
         }
 
         // Redirect back to admin.

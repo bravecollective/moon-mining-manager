@@ -63,7 +63,7 @@
                                     {{ $renter->character_name ? $renter->character_name : '[missing name]' }}
                                 </a>
                             </td>
-                            <td>{{ $renter->type }}</td>
+                            <td>{{ ($renter->type === 'individual')? 'active' : 'passive' }}</td>
                             <td>{{ $renter->notes }}</td>
                             <td class="numeric">{{ number_format($renter->monthly_rental_fee, 0) }}</td>
                             <td class="numeric">{{ number_format($renter->amount_owed, 0) }}</td>
