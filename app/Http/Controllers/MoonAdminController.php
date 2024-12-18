@@ -140,7 +140,7 @@ class MoonAdminController extends Controller
 
             // new moon?
             $matches = [];
-            if (preg_match('/([A-Z0-9-]{6}) ([XVI]{1,4}) - Moon ([0-9]{1,2})/', trim($cols[0]), $matches)) {
+            if (preg_match('/([A-Z0-9][A-Za-z0-9- ]{2,31}) ([XVI]{1,5}) - Moon ([0-9]{1,2})/', trim($cols[0]), $matches)) {
                 // save previous moon
                 if ($moon instanceof Moon) {
                     $moon->save();
