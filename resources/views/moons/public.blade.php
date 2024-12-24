@@ -117,7 +117,7 @@
                                 \App\Models\Moon::STATUS_ALLIANCE_OWNED => 'Alliance owned',
                                 \App\Models\Moon::STATUS_LOTTERY_ONLY => 'Lottery only',
                                 \App\Models\Moon::STATUS_RESERVED => 'Reserved',
-                                \App\Models\Moon::STATUS_AVAILABLE => 'Available',
+                                \App\Models\Moon::STATUS_AVAILABLE => empty( $moon->active_renter ) ? 'Available' : '',
                                 default => '',
                             } }}
                         </td>
