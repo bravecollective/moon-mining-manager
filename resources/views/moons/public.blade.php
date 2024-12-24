@@ -136,13 +136,11 @@
             $moonsTable
             .tablesorter({
                 widthFixed: true,
-                debug: true,
                 widgets: ['filter'],
                 widgetOptions: {
                     filter_columnFilters: false,
                     filter_filteredRow: 'filtered',
                     filter_external: '.search',
-                    // filter_saveFilters: true,
                 },
             });
         });
