@@ -44,6 +44,7 @@
             <select class="external-filter search" data-column="13">
                 <option value="">All</option>
                 <option value="Available">Available</option>
+                <option value="Rented">Rented</option>
                 <option value="Alliance owned">Alliance owned</option>
                 <option value="Lottery only">Lottery only</option>
                 <option value="Reserved">Reserved</option>
@@ -117,7 +118,7 @@
                                 \App\Models\Moon::STATUS_ALLIANCE_OWNED => 'Alliance owned',
                                 \App\Models\Moon::STATUS_LOTTERY_ONLY => 'Lottery only',
                                 \App\Models\Moon::STATUS_RESERVED => 'Reserved',
-                                \App\Models\Moon::STATUS_AVAILABLE => empty( $moon->active_renter ) ? 'Available' : '',
+                                \App\Models\Moon::STATUS_AVAILABLE => empty( $moon->active_renter ) ? 'Rented' : '',
                                 default => '',
                             } }}
                         </td>
