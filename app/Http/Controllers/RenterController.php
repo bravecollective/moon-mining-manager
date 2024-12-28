@@ -271,6 +271,34 @@ class RenterController extends Controller
         return redirect('/renters');
     }
 
+    private function bulkPopulate(Request $request)
+    {
+        $rows = split('\n', $request->bulk);
+        foreach ($row in $rows) {
+            $row = trim($row);
+            if (!preg_match('(\d+)\t(\d+)\t(\d+)\t([0-9,.]+)\t(\d{4}-\d{2}-\d{2})\t(\d{4}-\d{2}-\d{2})\t(.*)', $row, $matches, PREG_UNMATCHED_AS_NULL)) {
+                return;
+            }
+
+            $renter = new Renter;
+            $renter->type = Renter::TYPE_ACTIVE;
+            // TODO: renter name to string
+            $renter->character_id = $this->characterNameToId($matches[1]);
+            $renter->refinery_id = $matches[2];
+            $renter->moon_id = $matches[3];
+            $renter->monthly_rental_fee = floatval($matches[4]);
+            $renter->start_date = $matches[5];
+            $renter->save();
+        }
+    }
+
+    private function characterNameToId(string $name)
+    {
+        // check local db first
+        // then try esi
+        return 0;
+    }
+
     private function populateDataAndSave(Renter $renter, $request)
     {
         $renter->type = ($request->type == Renter::TYPE_ACTIVE)? Renter::TYPE_ACTIVE : Renter::TYPE_PASSIVE;
