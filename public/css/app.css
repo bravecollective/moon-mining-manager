@@ -398,7 +398,7 @@ body {
 @font-face {
   font-family: "icomoon";
   src: url(/fonts/icomoon.eot?385be32bf039352a6983879201e1bd15);
-  src: url(/fonts/icomoon.eot?385be32bf039352a6983879201e1bd15) format("embedded-opentype"), url(/fonts/icomoon.ttf?767e7baf80d54ee67bf5889989155cb2) format("truetype"), url(/fonts/icomoon.woff?2450a60ed70b872962ef6dfca1fee0c3) format("woff"), url(/fonts/icomoon.svg?8ab357ba0dfff8708e46bd269767fa71) format("svg");
+  src: url(/fonts/icomoon.eot?385be32bf039352a6983879201e1bd15) format("embedded-opentype"), url(/fonts/icomoon.ttf?767e7baf80d54ee67bf5889989155cb2) format("truetype"), url(/fonts/icomoon.woff?2450a60ed70b872962ef6dfca1fee0c3) format("woff"), url(/fonts/icomoon.svg?914fd5e43261ecc0eda334986896e59f) format("svg");
   font-weight: normal;
   font-style: normal;
 }
@@ -889,6 +889,10 @@ th {
 
 .numeric {
   text-align: right;
+}
+
+tr.filtered {
+  display: none;
 }
 
 form .card > div {

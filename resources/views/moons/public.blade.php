@@ -22,6 +22,35 @@
     </p>
 
     <div class="row">
+        <form class="external-filters">
+            <!-- Region Filter (Dropdown) -->
+            <label for="region-filter">Region:</label>
+            <select id="region-filter" class="external-filter search" data-column="1">
+                <option value="">All Regions</option>
+                @foreach (collect($moons)->pluck('region.regionName')->unique()->sort() as $region)
+                    <option value="{{ $region }}">{{ $region }}</option>
+                @endforeach
+            </select>
+
+            <!-- System Filter (Searchable Dropdown) -->
+            <label for="system-filter">System:</label>
+            <input type="text" id="system-filter" class="external-filter search" data-column="2" placeholder="Search System">
+
+            <!-- Mineral Name Filter (Searchable Dropdown) -->
+            <label for="mineral-filter">Minerals:</label>
+            <input type="text" id="mineral-filter" class="external-filter search" data-column="5,6,7,8" placeholder="Try: Tungsten|Caesium">
+
+            <label for="status-filter">Status:</label>
+            <select class="external-filter search" data-column="13">
+                <option value="">All</option>
+                <option value="Available">Available</option>
+                <option value="Rented">Rented</option>
+                <option value="Alliance owned">Alliance owned</option>
+                <option value="Lottery only">Lottery only</option>
+                <option value="Reserved">Reserved</option>
+            </select>
+
+        </form>
 
         <table id="moons" class="moons">
             <thead>
@@ -85,9 +114,13 @@
                           @endif
                         </td>
                         <td>
-                            {{ $moon->status_flag == \App\Models\Moon::STATUS_ALLIANCE_OWNED ? 'Alliance owned' : '' }}
-                            {{ $moon->status_flag == \App\Models\Moon::STATUS_LOTTERY_ONLY ? 'Lottery only' : '' }}
-                            {{ $moon->status_flag == \App\Models\Moon::STATUS_RESERVED ? 'Reserved' : '' }}
+                            {{ match($moon->status_flag) {
+                                \App\Models\Moon::STATUS_ALLIANCE_OWNED => 'Alliance owned',
+                                \App\Models\Moon::STATUS_LOTTERY_ONLY => 'Lottery only',
+                                \App\Models\Moon::STATUS_RESERVED => 'Reserved',
+                                \App\Models\Moon::STATUS_AVAILABLE => empty( $moon->active_renter ) ? 'Available' : 'Rented',
+                                default => '',
+                            } }}
                         </td>
                     </tr>
                 @endforeach
@@ -99,7 +132,18 @@
     <script>
 
         window.addEventListener('load', function () {
-            $('#moons').tablesorter();
+            var $moonsTable = $('#moons');
+
+            $moonsTable
+            .tablesorter({
+                widthFixed: true,
+                widgets: ['filter'],
+                widgetOptions: {
+                    filter_columnFilters: false,
+                    filter_filteredRow: 'filtered',
+                    filter_external: '.search',
+                },
+            });
         });
 
     </script>

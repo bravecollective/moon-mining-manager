@@ -62,6 +62,15 @@
                 width: 90%;
             }
 
+            form.external-filters {
+                width: 90%;
+                margin: 20px auto;
+            }
+
+            form.external-filters .external-filter {
+                margin-right: 20px;
+            }
+
             th, td {
                 text-align: left;
                 padding: 10px;
@@ -70,6 +79,10 @@
 
             th {
                 background: #eee;
+            }
+
+            tr.filtered {
+                display: none;
             }
 
             .rented td {
