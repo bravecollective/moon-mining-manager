@@ -35,10 +35,10 @@
                                     {{ ($renter->type == \App\Models\Renter::TYPE_ACTIVE) ? ' selected' : '' }}>
                                 Active
                             </option>
-                            <option value="{{\App\Models\Renter::TYPE_PASSIVE}}"
+                            <!-- <option value="{{\App\Models\Renter::TYPE_PASSIVE}}"
                                     {{ ($renter->type == \App\Models\Renter::TYPE_PASSIVE) ? ' selected' : '' }}>
                                 Passive
-                            </option>
+                            </option> -->
                         </select>
                     </div>
                     <div>

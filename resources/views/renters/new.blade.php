@@ -32,7 +32,7 @@
                         <label for="type">Type of rental</label>
                         <select id="type" name="type" onchange="updateFee()">
                             <option value="{{\App\Models\Renter::TYPE_ACTIVE}}">Active</option>
-                            <option value="{{\App\Models\Renter::TYPE_PASSIVE}}">Passive</option>
+                            <!-- <option value="{{\App\Models\Renter::TYPE_PASSIVE}}">Passive</option> -->
                         </select>
                     </div>
                     <div>
