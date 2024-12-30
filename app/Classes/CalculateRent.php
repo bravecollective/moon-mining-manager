@@ -14,7 +14,7 @@ class CalculateRent
 {
     protected $total_ore_volume = 21500000; // 21.5m m3 represents a 30-day mining cycle, approximately.
     protected $r4_discount_value = 50000000; // 50m flat rate discount for moons that are only R4
-    protected $min_moon_rental_price = 30000000; // 30m minimum rental price
+    protected $min_moon_rental_price = 50000000; // 50m minimum rental price
 
     public function updateMoon(Moon $moon, $contractType): int
     {
@@ -71,24 +71,25 @@ class CalculateRent
             // Based on the volume of the ore type, how many units does that volume represent.
             $units = $oreVolume / $type->volume;
 
-            // Base Tax Rate of 5%
-            $taxRate = 5;
+            // Base Tax Rate of 0%
+            $taxRate = 0;
 
             // Addition of previously-taxable value for each ore.
             switch ($type->groupID) {
                 case 1884: // Ubiquitous R4
+                    $taxRate = 0;
                     break;
                 case 1920: // Common R8
-                    $taxRate += 5;
+                    $taxRate = 0;
                     break;
                 case 1921: // Uncommon R16
-                    $taxRate += 10;
+                    $taxRate = 10;
                     break;
                 case 1922: // Rare R32
-                    $taxRate += 15;
+                    $taxRate = 20;
                     break;
                 case 1923: // Exceptional R64
-                    $taxRate += 20;
+                    $taxRate = 35;
                     break;
             }
 
