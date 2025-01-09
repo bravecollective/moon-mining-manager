@@ -13,11 +13,25 @@ input, select, textarea {
     width: 100%;
 }
 
+.external-filters {
+
+    margin-top: 1em;
+
+    label, select, input {
+        display: inline-block;
+        width: auto;
+        padding: 0.25em;
+    }
+    select, input {
+        margin-right: 1em;
+    }
+}
+
 .inline-form {
     input, select {
         display: inline;
         width: auto;
-    } 
+    }
 }
 
 textarea {

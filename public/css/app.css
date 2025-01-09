@@ -911,6 +911,23 @@ textarea {
   width: 100%;
 }
 
+.external-filters {
+  margin-top: 1em;
+}
+
+.external-filters label,
+.external-filters select,
+.external-filters input {
+  display: inline-block;
+  width: auto;
+  padding: 0.25em;
+}
+
+.external-filters select,
+.external-filters input {
+  margin-right: 1em;
+}
+
 .inline-form input,
 .inline-form select {
   display: inline;
