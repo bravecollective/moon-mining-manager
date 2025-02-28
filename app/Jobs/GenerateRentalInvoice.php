@@ -20,6 +20,8 @@ class GenerateRentalInvoice implements ShouldQueue
 
     public $tries = 10;
     private $id;
+    private $name;
+    private $contracts;
     private $mail_delay;
 
     /**
@@ -28,9 +30,11 @@ class GenerateRentalInvoice implements ShouldQueue
      * @param int $id
      * @return void
      */
-    public function __construct($id, $mail_delay = 20)
+    public function __construct($id, $name, $contracts, $mail_delay = 20)
     {
         $this->id = $id;
+        $this->name = $name;
+        $this->contracts = $contracts;
         $this->mail_delay = $mail_delay;
     }
 
@@ -42,55 +46,69 @@ class GenerateRentalInvoice implements ShouldQueue
      */
     public function handle()
     {
+        $moons = array();
+        $maxNameLen = strlen('Moon Name');
+        $maxRentLen = strlen('Monthly Fee');
+        $maxOwedLen = strlen('Amount Owed');
+        $owedSum = 0;
 
-        // Retrieve the renter record.
-        $renter = Renter::find($this->id);
+        foreach ($this->contracts as $contractId) {
+            // Retrieve the renter record.
+            $renter = Renter::find($contractId);
+            Log::info("generating mail for $contractId - $renter->character_id");
 
-        // Request the character name for this rental agreement.
-        $esi = new EsiConnection;
-        $character = $esi->getConnection()->invoke('get', '/characters/{character_id}/', [
-            'character_id' => $renter->character_id,
-        ]);
+            // Grab a reference to the refinery/moon that is being rented.
+            $nameRented = trim($renter->getRentedName());
+            if ($nameRented === null) {
+                // technically possible here, but should never happen
+                Log::warning("GenerateRentalInvoice: Renter $contractId without moon? skipping entry.");
+                continue;
+            }
 
-        // Grab a reference to the refinery/moon that is being rented.
-        $nameRented = $renter->getRentedName();
-        if ($nameRented === null) {
-            // technically possible here, but should never happen
-            Log::info("GenerateRentalInvoice: Renter $this->id without moon? Aborting.");
-            return;
+            // Calculate the amount to invoice, taking into account partial months at the start of rental agreements.
+            $this_month = date('n');
+            $start_month = date('n', strtotime($renter->start_date));
+            $this_year = date('Y');
+            $start_year = date('Y', strtotime($renter->start_date));
+            $invoice_amount = $renter->monthly_rental_fee;
+
+            if (($this_month == $start_month + 1 && $this_year == $start_year) ||
+                ($this_month == 1 && $start_month == 12 && $this_year == $start_year + 1)
+            ) {
+                // Rental contract started last month, we need to add on a proportion of the monthly
+                // fee to this month's invoice.
+                $start_date = date('j', strtotime($renter->start_date));
+                $days_in_month = date('t', strtotime($renter->start_date));
+                $extra_days_to_invoice = $days_in_month - $start_date + 1;
+                $proportion_of_monthly_rent = $extra_days_to_invoice / $days_in_month;
+                $additional_rent_to_charge = $renter->monthly_rental_fee * $proportion_of_monthly_rent;
+                $invoice_amount += $additional_rent_to_charge;
+            }
+
+            // Round the amount so we don't have issues comparing payments without cents.
+            $invoice_amount = round($invoice_amount);
+
+            // Update the amount this renter currently owes.
+            $renter->amount_owed += $invoice_amount;
+            $renter->generate_invoices_job_run = date('Y-m-d H:i:s');
+            Log::info(
+                'GenerateRentalInvoice: updated stored amount owed by renter ' . $renter->name .
+                ' for refinery/moon ' . $nameRented . ' to ' . $renter->amount_owed
+            );
+            $renter->save();
+
+            $owedSum += $renter->amount_owed;
+            $owed = number_format($renter->amount_owed);
+            $rent = number_format($renter->monthly_rental_fee);
+            $moons[$renter->moon_id] = array(
+                'name' => $nameRented,
+                'rent' => $rent,
+                'owed' => $owed
+            );
+            $maxNameLen = max($maxNameLen, strlen($nameRented));
+            $maxRentLen = max($maxRentLen, strlen($rent));
+            $maxOwedLen = max($maxOwedLen, strlen($owed));
         }
-
-        // Calculate the amount to invoice, taking into account partial months at the start of rental agreements.
-        $this_month = date('n');
-        $start_month = date('n', strtotime($renter->start_date));
-        $this_year = date('Y');
-        $start_year = date('Y', strtotime($renter->start_date));
-        $invoice_amount = $renter->monthly_rental_fee;
-
-        if (($this_month == $start_month + 1 && $this_year == $start_year) ||
-            ($this_month == 1 && $start_month == 12 && $this_year == $start_year + 1)
-        ) {
-            // Rental contract started last month, we need to add on a proportion of the monthly
-            // fee to this month's invoice.
-            $start_date = date('j', strtotime($renter->start_date));
-            $days_in_month = date('t', strtotime($renter->start_date));
-            $extra_days_to_invoice = $days_in_month - $start_date + 1;
-            $proportion_of_monthly_rent = $extra_days_to_invoice / $days_in_month;
-            $additional_rent_to_charge = $renter->monthly_rental_fee * $proportion_of_monthly_rent;
-            $invoice_amount += $additional_rent_to_charge;
-        }
-
-        // Round the amount so we don't have issues comparing payments without cents.
-        $invoice_amount = round($invoice_amount);
-
-        // Update the amount this renter currently owes.
-        $renter->amount_owed += $invoice_amount;
-        $renter->generate_invoices_job_run = date('Y-m-d H:i:s');
-        Log::info(
-            'GenerateRentalInvoice: updated stored amount owed by renter ' . $character->name .
-            ' for refinery/moon ' . $nameRented . ' to ' . $renter->amount_owed
-        );
-        $renter->save();
 
         // Pick up the renter invoice template to apply text substitutions.
         $template = Template::where('name', 'renter_invoice')->first(); /* @var Template $template */
@@ -101,13 +119,27 @@ class GenerateRentalInvoice implements ShouldQueue
 
         // Replace placeholder elements in email template.
         $subject = str_replace('{date}', date('Y-m-d'), $subject);
-        $subject = str_replace('{name}', $character->name, $subject);
+        $subject = str_replace('{name}', $renter->name, $subject);
         $subject = str_replace('{amount_owed}', number_format($renter->amount_owed), $subject);
         $body = str_replace('{date}', date('Y-m-d'), $body);
-        $body = str_replace('{name}', $character->name, $body);
+        $body = str_replace('{name}', $renter->name, $body);
         $body = str_replace('{refinery}', $nameRented, $body);
         $body = str_replace('{amount_owed}', number_format($renter->amount_owed), $body);
         $body = str_replace('{monthly_rental_fee}', number_format($invoice_amount), $body);
+
+        $combined = "<pre>" . str_pad('Moon Name', $maxNameLen) . '  ' . str_pad('Monthly Fee', $maxRentLen) . "  Amount Owed\n";
+        $maxLineLen = 0;
+        foreach ($moons as $moon) {
+            $line = str_pad($moon['name'], $maxNameLen) . '  ' .
+                str_pad($moon['rent'], $maxRentLen, ' ', STR_PAD_LEFT) . '  ' .
+                str_pad($moon['owed'], $maxOwedLen, ' ', STR_PAD_LEFT);
+            $maxLineLen = max($maxLineLen, strlen($line));
+            $combined .= $line . "\n";
+        }
+        $owedValue = number_format($owedSum);
+        $combined .= str_pad("Total Owed: $owedValue", $maxLineLen, ' ', STR_PAD_LEFT) . "</pre>";
+        $body = str_replace('{combined_rentals}', $combined, $body);
+
         $mail = array(
             'body' => $body,
             'recipients' => array(

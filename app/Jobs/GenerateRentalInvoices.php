@@ -28,7 +28,7 @@ class GenerateRentalInvoices implements ShouldQueue
         // that started before the beginning of month
         // and will end after or on the first day of this month
         // and were not yet updated this month
-        $renters = Renter::whereRaw(
+        $contracts = Renter::whereRaw(
             'moon_id IS NOT NULL AND 
             start_date < DATE_SUB(CURDATE(), INTERVAL DAYOFMONTH(CURDATE()) - 1 DAY) AND
             (
@@ -44,16 +44,22 @@ class GenerateRentalInvoices implements ShouldQueue
         // Loop through all the renters and send an invoice for the appropriate amount
         // (taking into account partial months).
         $delay_counter = 1;
+        $renters = array();
+        foreach ($contracts as $contract) {
+            $renters[$contract->character_id]['id'] = $contract->character_id;
+            $renters[$contract->character_id]['name'] = $contract->character_name;
+            $renters[$contract->character_id]['contracts'][] = $contract->id;
+        }
+
         foreach ($renters as $renter) {
             // Queue jobs to create and send the individual invoices.
-            GenerateRentalInvoice::dispatch($renter->id, $delay_counter)
+            GenerateRentalInvoice::dispatch($renter['id'], $renter['name'], $renter['contracts'], $delay_counter)
                 ->delay(Carbon::now()->addSeconds($delay_counter * 10));
             Log::info(
                 'GenerateRentalInvoices: dispatched job to generate invoice for renter ' .
-                $renter->character_id . ' and send mail in ' . $delay_counter . ' minutes'
+                $renter['name'] . ' and send mail in ' . $delay_counter . ' minutes'
             );
             $delay_counter++;
         }
-
     }
 }
