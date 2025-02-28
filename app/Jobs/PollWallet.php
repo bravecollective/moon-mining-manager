@@ -94,40 +94,54 @@ class PollWallet implements ShouldQueue
         $pollNextPage = $transactions->pages > $this->page;
 
         foreach ($transactions as $transaction) {
+            if ($transaction->ref_type != 'player_donation') {
+                continue;
+            }
+
             $ref_id = $transaction->id;
             $date = date('Y-m-d', strtotime($transaction->date));
-            if ($transaction->ref_type == 'player_donation') {
 
-                // Checks to see if this donation was already processed.
-                $payment = Payment::where('ref_id', $ref_id)->first();
-                $rental_payment = RentalPayment::where('ref_id', $ref_id)->first();
-                if ($payment || $rental_payment) {
-                    $pollNextPage = false;
-                    continue;
-                }
+            // Checks to see if this donation was already processed.
+            $payment = Payment::where('ref_id', $ref_id)->first();
+            if ($payment) {
+                $pollNextPage = false;
+                continue;
+            }
+            $rental_payment = RentalPayment::where('ref_id', $ref_id)->first();
+            if ($rental_payment) {
+                $pollNextPage = false;
+                continue;
+            }
 
-                // Look for matching payers among renters and miners.
-                $renter = Renter::where([
-                    ['character_id', $transaction->first_party_id],
-                    ['amount_owed', $transaction->amount],
-                ])->first(); /* @var Renter $renter */
-                $miner = Miner::where('eve_id', $transaction->first_party_id)->first(); /* @var Miner $miner */
+            // Look for matching payers among renters and miners.
+            $contracts = Renter::where('character_id', $transaction->first_party_id)->get(); /* @var Renter $renter */
+            $miner = Miner::where('eve_id', $transaction->first_party_id)->first(); /* @var Miner $miner */
 
-                // First check if the payment comes from a recognised renter and is exactly
-                // the right amount for an outstanding refinery balance
-                // (and wasn't already processed).
-                if ($this->userId == env('RENT_CORPORATION_PRIME_USER_ID') &&
-                    isset($renter) && !isset($rental_payment)
-                ) {
-                    $this->processRents($transaction, $renter, $ref_id);
-                } // Next, if this donation is actually from a recognised miner (and wasn't already processed).
-                elseif ($this->userId == env('TAX_CORPORATION_PRIME_USER_ID') && isset($miner) && !isset($payment)) {
-                    $this->processTaxes($transaction, $miner, $date, $ref_id);
-                } else {
-                    Log::info('skipping ' . json_encode($transaction));
+            // First check if the payment comes from a recognised renter and is exactly
+            // the right amount for an outstanding refinery balance
+            // (and wasn't already processed).
+            $paidPool = $transaction->amount;
+            if ($this->userId == env('RENT_CORPORATION_PRIME_USER_ID') && isset($contracts)) {
+                foreach ($contracts as $contract) {
+                    $amountPaid = min($contract->amount_owed, $paidPool);
+                    if ($amountPaid <= 0.0) {
+                        continue;
+                    }
+                    $paidPool -= $amountPaid;
+                    Log::info('paying off '. number_format($amountPaid) . ' on moon '. $contract->moon_id);
+                    $this->processRents($transaction, $amountPaid, $contract, $ref_id);
                 }
             }
 
+            // Next, if this donation is actually from a recognised miner (and wasn't already processed).
+            if ($paidPool > 0.0 && $this->userId == env('TAX_CORPORATION_PRIME_USER_ID') && isset($miner)) {
+                // TODO: don't overwrite tx->amount
+                $transaction->amount = $paidPool;
+                $this->processTaxes($transaction, $paidPool, $miner, $date, $ref_id);
+            }
+            if ($paidPool > 0.0) {
+                Log::warning('transaction amount not entirely applied ' . json_encode($transaction));
+            }
         }
 
         // poll next page?
@@ -158,7 +172,7 @@ class PollWallet implements ShouldQueue
      * @param int $ref_id
      * @throws \Exception
      */
-    private function processRents($transaction, Renter $renter, $ref_id)
+    private function processRents($transaction, $portionPaid, Renter $renter, $ref_id)
     {
         // Record this transaction in the rental_payments table.
         $payment = new RentalPayment;
@@ -166,16 +180,16 @@ class PollWallet implements ShouldQueue
         $payment->refinery_id = $renter->refinery_id;
         $payment->moon_id = $renter->moon_id;
         $payment->ref_id = $ref_id;
-        $payment->amount_received = $transaction->amount;
+        $payment->amount_received = $portionPaid;
         $payment->save();
 
         // Clear their outstanding debt.
-        $renter->amount_owed = 0;
+        $renter->amount_owed -= $portionPaid;
         $renter->save();
         Log::info(
             'PollWallet: saved a new payment from renter ' . $renter->character_id .
             ' at refinery ' . $renter->refinery_id . '/moon  ' . $renter->moon_id .
-            ' for ' . $transaction->amount
+            ' for ' . $portionPaid
         );
 
         // Retrieve the name of the character.
@@ -192,7 +206,7 @@ class PollWallet implements ShouldQueue
      * @param string $date
      * @param int $ref_id
      */
-    private function processTaxes($transaction, Miner $miner, $date, $ref_id)
+    private function processTaxes($transaction, $paid_amount, Miner $miner, $date, $ref_id)
     {
         Log::info('PollWallet: found a player donation of ' . $transaction->amount .
             ' ISK from a recognised miner ' . $miner->eve_id . ' on ' . $date . ', reference ' . $ref_id);
