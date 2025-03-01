@@ -7,6 +7,35 @@
     <div class="row" id="moonAdminList" data-csrf-token="{{ csrf_token() }}">
         <div class="col-12">
             <div class="card-heading">Existing Moon Data</div>
+            <form class="external-filters">
+                <!-- Region Filter (Dropdown) -->
+                <label for="region-filter">Region:</label>
+                <select id="region-filter" class="external-filter search" data-column="1">
+                    <option value="">All Regions</option>
+                    @foreach (collect($moons)->pluck('region.regionName')->unique()->sort() as $region)
+                        <option value="{{ $region }}">{{ $region }}</option>
+                    @endforeach
+                </select>
+
+                <label for="system-filter">System:</label>
+                <input type="text" id="system-filter" class="external-filter search" data-column="2" placeholder="Search System">
+
+                <label for="system-filter">Renter:</label>
+                <input type="text" id="system-filter" class="external-filter search" data-column="9" placeholder="Search Renters">
+
+                <label for="mineral-filter">Minerals:</label>
+                <input type="text" id="mineral-filter" class="external-filter search" data-column="5" placeholder="Try: Cadmium|Cobalt">
+
+                <label for="status-filter">Status:</label>
+                <select class="external-filter search" data-column="11">
+                    <option value="">All</option>
+                    <option value="Available">Available</option>
+                    <option value="Alliance owned">Alliance owned</option>
+                    <option value="Lottery only">Lottery only</option>
+                    <option value="Reserved">Reserved</option>
+                </select>
+
+            </form>
             <table id="moons">
                 <thead>
                     <tr>
@@ -94,7 +123,6 @@
 
     <script type="text/javascript">
         window.addEventListener('load', function() {
-            $('#moons').tablesorter();
             $('#moons th.moon-status-head').on('click', function () {
                 // trigger an update to sort changed values
                 $('#moons').trigger('update');
@@ -102,6 +130,16 @@
 
             $('.moon-status').each(function () {
                 setStatusText($(this));
+            });
+
+            $('#moons').tablesorter({
+                widthFixed: true,
+                widgets: ['filter'],
+                widgetOptions: {
+                    filter_columnFilters: false,
+                    filter_filteredRow: 'filtered',
+                    filter_external: '.search',
+                },
             });
         });
 
