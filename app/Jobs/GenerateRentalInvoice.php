@@ -30,10 +30,8 @@ class GenerateRentalInvoice implements ShouldQueue
      * @param int $id
      * @return void
      */
-    public function __construct($id, $name, $contracts, $mail_delay = 20)
+    public function __construct($contracts, $mail_delay = 20)
     {
-        $this->id = $id;
-        $this->name = $name;
         $this->contracts = $contracts;
         $this->mail_delay = $mail_delay;
     }
@@ -55,7 +53,6 @@ class GenerateRentalInvoice implements ShouldQueue
         foreach ($this->contracts as $contractId) {
             // Retrieve the renter record.
             $renter = Renter::find($contractId);
-            Log::info("generating mail for $contractId - $renter->character_id");
 
             // Grab a reference to the refinery/moon that is being rented.
             $nameRented = trim($renter->getRentedName());
@@ -92,7 +89,7 @@ class GenerateRentalInvoice implements ShouldQueue
             $renter->amount_owed += $invoice_amount;
             $renter->generate_invoices_job_run = date('Y-m-d H:i:s');
             Log::info(
-                'GenerateRentalInvoice: updated stored amount owed by renter ' . $renter->name .
+                'GenerateRentalInvoice: updated stored amount owed by renter ' . $renter->character_name .
                 ' for refinery/moon ' . $nameRented . ' to ' . $renter->amount_owed
             );
             $renter->save();
@@ -119,10 +116,10 @@ class GenerateRentalInvoice implements ShouldQueue
 
         // Replace placeholder elements in email template.
         $subject = str_replace('{date}', date('Y-m-d'), $subject);
-        $subject = str_replace('{name}', $renter->name, $subject);
+        $subject = str_replace('{name}', $renter->character_name, $subject);
         $subject = str_replace('{amount_owed}', number_format($renter->amount_owed), $subject);
         $body = str_replace('{date}', date('Y-m-d'), $body);
-        $body = str_replace('{name}', $renter->name, $body);
+        $body = str_replace('{name}', $renter->character_name, $body);
         $body = str_replace('{refinery}', $nameRented, $body);
         $body = str_replace('{amount_owed}', number_format($renter->amount_owed), $body);
         $body = str_replace('{monthly_rental_fee}', number_format($invoice_amount), $body);
