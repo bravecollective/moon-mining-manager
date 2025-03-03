@@ -114,32 +114,33 @@ class PollWallet implements ShouldQueue
             }
 
             // Look for matching payers among renters and miners.
-            $contracts = Renter::where('character_id', $transaction->first_party_id)->get(); /* @var Renter $renter */
+            $contracts = Renter::where([
+                ['character_id', $transaction->first_party_id],
+                ['amount_owed', '>', 0.0],
+                ])->get(); /* @var Renter $renter */
             $miner = Miner::where('eve_id', $transaction->first_party_id)->first(); /* @var Miner $miner */
 
             // First check if the payment comes from a recognised renter and is exactly
             // the right amount for an outstanding refinery balance
             // (and wasn't already processed).
-            $paidPool = $transaction->amount;
+            $payment_pool = $transaction->amount;
             if ($this->userId == env('RENT_CORPORATION_PRIME_USER_ID') && isset($contracts)) {
                 foreach ($contracts as $contract) {
-                    $amountPaid = min($contract->amount_owed, $paidPool);
-                    if ($amountPaid <= 0.0) {
+                    $amount_paid = min($contract->amount_owed, $payment_pool);
+                    if ($amount_paid <= 0.0) {
                         continue;
                     }
-                    $paidPool -= $amountPaid;
-                    Log::info('paying off '. number_format($amountPaid) . ' on moon '. $contract->moon_id);
-                    $this->processRents($transaction, $amountPaid, $contract, $ref_id);
+                    $payment_pool -= $amount_paid;
+                    Log::info('paying off '. number_format($amount_paid) . ' on moon '. $contract->moon_id);
+                    $this->processRents($transaction, $amount_paid, $contract, $ref_id);
                 }
             }
 
             // Next, if this donation is actually from a recognised miner (and wasn't already processed).
-            if ($paidPool > 0.0 && $this->userId == env('TAX_CORPORATION_PRIME_USER_ID') && isset($miner)) {
-                // TODO: don't overwrite tx->amount
-                $transaction->amount = $paidPool;
-                $this->processTaxes($transaction, $paidPool, $miner, $date, $ref_id);
+            if ($payment_pool > 0.0 && $this->userId == env('TAX_CORPORATION_PRIME_USER_ID') && isset($miner)) {
+                $this->processTaxes($transaction, $payment_pool, $miner, $date, $ref_id);
             }
-            if ($paidPool > 0.0) {
+            if ($payment_pool > 0.0) {
                 Log::warning('transaction amount not entirely applied ' . json_encode($transaction));
             }
         }
@@ -172,7 +173,7 @@ class PollWallet implements ShouldQueue
      * @param int $ref_id
      * @throws \Exception
      */
-    private function processRents($transaction, $portionPaid, Renter $renter, $ref_id)
+    private function processRents($transaction, $amount_paid, Renter $renter, $ref_id)
     {
         // Record this transaction in the rental_payments table.
         $payment = new RentalPayment;
@@ -180,16 +181,16 @@ class PollWallet implements ShouldQueue
         $payment->refinery_id = $renter->refinery_id;
         $payment->moon_id = $renter->moon_id;
         $payment->ref_id = $ref_id;
-        $payment->amount_received = $portionPaid;
+        $payment->amount_received = $amount_paid;
         $payment->save();
 
         // Clear their outstanding debt.
-        $renter->amount_owed -= $portionPaid;
+        $renter->amount_owed -= $amount_paid;
         $renter->save();
         Log::info(
             'PollWallet: saved a new payment from renter ' . $renter->character_id .
             ' at refinery ' . $renter->refinery_id . '/moon  ' . $renter->moon_id .
-            ' for ' . $portionPaid
+            ' for ' . $amount_paid
         );
 
         // Retrieve the name of the character.
@@ -206,9 +207,9 @@ class PollWallet implements ShouldQueue
      * @param string $date
      * @param int $ref_id
      */
-    private function processTaxes($transaction, $paid_amount, Miner $miner, $date, $ref_id)
+    private function processTaxes($transaction, $payment_pool, Miner $miner, $date, $ref_id)
     {
-        Log::info('PollWallet: found a player donation of ' . $transaction->amount .
+        Log::info('PollWallet: found a player donation of ' . $payment_pool .
             ' ISK from a recognised miner ' . $miner->eve_id . ' on ' . $date . ', reference ' . $ref_id);
 
         // Parse the 'reason' entered by the player to see if they want to pay off other players/alts bills.
@@ -248,14 +249,10 @@ class PollWallet implements ShouldQueue
             foreach ($recipients as $recipient) {
                 // Calculate how much to pay off for this recipient - either the full amount, or whatever
                 // is left of the balance.
-                if ($transaction->amount >= $recipient->amount_owed) {
-                    $payment_amount = $recipient->amount_owed;
-                } else {
-                    $payment_amount = $transaction->amount;
-                }
+                $payment_amount = min($recipient->amount_owed, $payment_pool)
 
                 // Update the remaining balance of what was sent.
-                $transaction->amount = $transaction->amount - $payment_amount;
+                $payment_pool -= $payment_amount;
 
                 // Record the transaction in the payments table.
                 $payment = new Payment;
@@ -278,18 +275,18 @@ class PollWallet implements ShouldQueue
         }
 
         // If there is any money left to apply to the donator's balance after paying other recipients.
-        if ($transaction->amount > 0) {
+        if ($payment_pool > 0) {
             // Record this transaction in the payments table.
             $payment = new Payment;
             $payment->miner_id = $transaction->first_party_id;
             $payment->ref_id = $ref_id;
-            $payment->amount_received = $transaction->amount;
+            $payment->amount_received = $payment_pool;
             $payment->save();
 
-            Log::info('PollWallet: saved a new payment from miner ' . $miner->eve_id . ' for ' . $transaction->amount);
+            Log::info('PollWallet: saved a new payment from miner ' . $miner->eve_id . ' for ' . $payment_pool);
 
             // Deduct the amount from their outstanding balance.
-            $miner->amount_owed -= $transaction->amount;
+            $miner->amount_owed -= $payment_pool;
             $miner->save();
         }
 
