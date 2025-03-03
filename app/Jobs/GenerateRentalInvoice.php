@@ -88,11 +88,20 @@ class GenerateRentalInvoice implements ShouldQueue
             // Update the amount this renter currently owes.
             $renter->amount_owed += $invoice_amount;
             $renter->generate_invoices_job_run = date('Y-m-d H:i:s');
-            Log::info(
-                'GenerateRentalInvoice: updated stored amount owed by renter ' . $renter->character_name .
-                ' for refinery/moon ' . $nameRented . ' to ' . $renter->amount_owed
-            );
             $renter->save();
+
+            // Write an invoice entry.
+            $invoice = new RentalInvoice;
+            $invoice->renter_id = $renter->character_id;
+            $invoice->refinery_id = $renter->refinery_id;
+            $invoice->moon_id = $renter->moon_id;
+            $invoice->amount = $invoice_amount;
+            $invoice->save();
+
+            Log::info(
+                'GenerateRentalInvoice: invoiceed renter ' . $renter->character_id .
+                ' at refinery/moon ' . $nameRented . ' for amount ' . $invoice_amount
+            );
 
             $owedSum += $renter->amount_owed;
             $owed = number_format($renter->amount_owed);
@@ -154,18 +163,5 @@ class GenerateRentalInvoice implements ShouldQueue
         Log::info('GenerateRentalInvoice: dispatched job to send mail in ' . $this->mail_delay . ' minutes', [
             'mail' => $mail,
         ]);
-
-        // Write an invoice entry.
-        $invoice = new RentalInvoice;
-        $invoice->renter_id = $renter->character_id;
-        $invoice->refinery_id = $renter->refinery_id;
-        $invoice->moon_id = $renter->moon_id;
-        $invoice->amount = $invoice_amount;
-        $invoice->save();
-
-        Log::info(
-            'GenerateRentalInvoice: saved new invoice for renter ' . $renter->character_id .
-            ' at refinery/moon ' . $nameRented . ' for amount ' . $invoice_amount
-        );
     }
 }
