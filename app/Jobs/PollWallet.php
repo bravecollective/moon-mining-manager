@@ -120,9 +120,6 @@ class PollWallet implements ShouldQueue
                 ])->get(); /* @var Renter $renter */
             $miner = Miner::where('eve_id', $transaction->first_party_id)->first(); /* @var Miner $miner */
 
-            // First check if the payment comes from a recognised renter and is exactly
-            // the right amount for an outstanding refinery balance
-            // (and wasn't already processed).
             $payment_pool = $transaction->amount;
             if ($this->userId == env('RENT_CORPORATION_PRIME_USER_ID') && isset($contracts)) {
                 foreach ($contracts as $contract) {
@@ -131,7 +128,6 @@ class PollWallet implements ShouldQueue
                         continue;
                     }
                     $payment_pool -= $amount_paid;
-                    Log::info('paying off '. number_format($amount_paid) . ' on moon '. $contract->moon_id);
                     $this->processRents($transaction, $amount_paid, $contract, $ref_id);
                 }
             }
@@ -189,7 +185,7 @@ class PollWallet implements ShouldQueue
         $renter->save();
         Log::info(
             'PollWallet: saved a new payment from renter ' . $renter->character_id .
-            ' at refinery ' . $renter->refinery_id . '/moon  ' . $renter->moon_id .
+            ' at refinery ' . $renter->refinery_id . '/moon ' . $renter->moon_id .
             ' for ' . $amount_paid
         );
 
