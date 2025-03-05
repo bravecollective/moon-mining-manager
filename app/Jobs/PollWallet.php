@@ -245,7 +245,7 @@ class PollWallet implements ShouldQueue
             foreach ($recipients as $recipient) {
                 // Calculate how much to pay off for this recipient - either the full amount, or whatever
                 // is left of the balance.
-                $payment_amount = min($recipient->amount_owed, $payment_pool)
+                $payment_amount = min($recipient->amount_owed, $payment_pool);
 
                 // Update the remaining balance of what was sent.
                 $payment_pool -= $payment_amount;
