@@ -18,31 +18,34 @@ class CalculateRent
 
     public function updateMoon(Moon $moon, $contractType): int
     {
-        // Set the monthly rental value to zero.
-        $fee = 0;
-
         $type = Type::find($moon->mineral_1_type_id);
         $ore_groups[] = $type->groupID;
-        $fee += $this->calculateOreTaxValue($type, $moon->mineral_1_percent, $contractType);
+        $ore_types[] = $type->typeName;
+        $fees[] = $this->calculateOreTaxValue($type, $moon->mineral_1_percent, $contractType);
         $type = Type::find($moon->mineral_2_type_id);
         $ore_groups[] = $type->groupID;
-        $fee += $this->calculateOreTaxValue($type, $moon->mineral_2_percent, $contractType);
+        $ore_types[] = $type->typeName;
+        $fees[] = $this->calculateOreTaxValue($type, $moon->mineral_2_percent, $contractType);
         if ($moon->mineral_3_type_id) {
             $type = Type::find($moon->mineral_3_type_id);
             $ore_groups[] = $type->groupID;
-            $fee += $this->calculateOreTaxValue($type, $moon->mineral_3_percent, $contractType);
+            $ore_types[] = $type->typeName;
+            $fees[] = $this->calculateOreTaxValue($type, $moon->mineral_3_percent, $contractType);
         }
         if ($moon->mineral_4_type_id) {
             $type = Type::find($moon->mineral_4_type_id);
             $ore_groups[] = $type->groupID;
-            $fee += $this->calculateOreTaxValue($type, $moon->mineral_4_percent, $contractType);
+            $ore_types[] = $type->typeName;
+            $fees[] = $this->calculateOreTaxValue($type, $moon->mineral_4_percent, $contractType);
         }
+
+        $fee = array_sum($fees);
 
         // Apply a flat 50m discount to rentals if there is only r4 ores in the moon.
         if (count(array_diff($ore_groups, [1884])) === 0) {
-          $fee -= $this->r4_discount_value;
-          $fee = max($fee, $this->min_moon_rental_price);
+            $fee -= $this->r4_discount_value;
         }
+        $fee = max($fee, $this->min_moon_rental_price);
 
         // Save the updated rental fee.
         if ($contractType === Renter::TYPE_PASSIVE) {
