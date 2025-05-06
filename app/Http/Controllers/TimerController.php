@@ -62,7 +62,7 @@ class TimerController extends Controller
         // Retrieve all refineries with active extraction periods.
         $taxCorporationId = env('TAX_CORPORATION_ID', 0);
         $refineries = Refinery::where('corporation_id', $taxCorporationId)->whereNotNull('extraction_start_time')
-            ->orderBy('chunk_arrival_time')->get();
+            ->where('available', 1)->orderBy('chunk_arrival_time')->get();
 
         // Parse the anticipated detonation time, based on any managed detonations.
         foreach ($refineries as $refinery) {
