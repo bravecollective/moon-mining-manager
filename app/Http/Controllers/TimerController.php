@@ -60,7 +60,7 @@ class TimerController extends Controller
         $whitelist = Whitelist::where('eve_id', $user->eve_id)->first();
 
         // Retrieve all refineries with active extraction periods.
-        $taxCorporationId = env('TAX_CORPORATION_ID', 0);
+        $taxCorporationId = config('eve.tax_corporation_id');
         $refineries = Refinery::where('corporation_id', $taxCorporationId)->whereNotNull('extraction_start_time')
             ->where('available', 1)->orderBy('chunk_arrival_time')->get();
 

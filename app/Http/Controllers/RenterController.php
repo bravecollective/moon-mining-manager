@@ -238,6 +238,16 @@ class RenterController extends Controller
             'start_date' => 'required|date',
         ]);
 
+        if ($request->moon_id) {
+            $alreadyRented = Renter::where('moon_id', $request->moon_id)
+                ->whereRaw('start_date <= CURDATE()')
+                ->whereRaw('(end_date IS NULL OR end_date >= CURDATE())')
+                ->exists();
+            if ($alreadyRented) {
+                return back()->withErrors(['moon_id' => 'This moon is already assigned to an active renter.'])->withInput();
+            }
+        }
+
         // If validation rules pass, then create the new Renter object.
         $renter = new Renter;
         $this->populateDataAndSave($renter, $request);
@@ -263,6 +273,17 @@ class RenterController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'nullable|date',
         ]);
+
+        if ($request->moon_id) {
+            $alreadyRented = Renter::where('moon_id', $request->moon_id)
+                ->where('id', '!=', $id)
+                ->whereRaw('start_date <= CURDATE()')
+                ->whereRaw('(end_date IS NULL OR end_date >= CURDATE())')
+                ->exists();
+            if ($alreadyRented) {
+                return back()->withErrors(['moon_id' => 'This moon is already assigned to an active renter.'])->withInput();
+            }
+        }
 
         // If validation rules pass, then update the existing Renter record.
         $renter = Renter::find($id);

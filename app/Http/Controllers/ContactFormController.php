@@ -68,7 +68,7 @@ class ContactFormController extends Controller
      */
     private function postSlack($text)
     {
-        $webHookUrl = env('SLACK_WEBHOOK_URL', '');
+        $webHookUrl = config('eve.slack_webhook_url');
         if ($webHookUrl === '') {
             Log::warning('ContactFormController: SLACK_WEBHOOK_URL not set.');
             return;

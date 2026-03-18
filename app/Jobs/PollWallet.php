@@ -121,7 +121,7 @@ class PollWallet implements ShouldQueue
             $miner = Miner::where('eve_id', $transaction->first_party_id)->first(); /* @var Miner $miner */
 
             $payment_pool = $transaction->amount;
-            if ($this->userId == env('RENT_CORPORATION_PRIME_USER_ID') && isset($contracts)) {
+            if ($this->userId == config('eve.rent_corporation_prime_user_id') && isset($contracts)) {
                 foreach ($contracts as $contract) {
                     $amount_paid = min($contract->amount_owed, $payment_pool);
                     if ($amount_paid <= 0.0) {
@@ -133,7 +133,7 @@ class PollWallet implements ShouldQueue
             }
 
             // Next, if this donation is actually from a recognised miner (and wasn't already processed).
-            if ($payment_pool > 0.0 && $this->userId == env('TAX_CORPORATION_PRIME_USER_ID') && isset($miner)) {
+            if ($payment_pool > 0.0 && $this->userId == config('eve.tax_corporation_prime_user_id') && isset($miner)) {
                 $this->processTaxes($transaction, $payment_pool, $miner, $date, $ref_id);
             }
             if ($payment_pool > 0.0) {

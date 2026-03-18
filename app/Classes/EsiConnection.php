@@ -62,12 +62,12 @@ class EsiConnection
      */
     public function getPrimeUserOfCorporation($corporationId)
     {
-        if ($corporationId == env('RENT_CORPORATION_ID')) {
-            return env('RENT_CORPORATION_PRIME_USER_ID');
+        if ($corporationId == config('eve.rent_corporation_id')) {
+            return config('eve.rent_corporation_prime_user_id');
         }
 
-        if ($corporationId == env('TAX_CORPORATION_ID')) {
-            return env('TAX_CORPORATION_PRIME_USER_ID');
+        if ($corporationId == config('eve.tax_corporation_id')) {
+            return config('eve.tax_corporation_prime_user_id');
         }
 
         return null;
@@ -85,8 +85,8 @@ class EsiConnection
         // Eseye configuration for all connections
         $configuration = Configuration::getInstance();
         $configuration->http_client = 'GuzzleHttp\Client';
-        $configuration->esi_host = env('EVEONLINE_ESI_HOST', 'esi.evetech.net');
-        $configuration->sso_host = env('EVEONLINE_SSO_HOST', 'login.eveonline.com');
+        $configuration->esi_host = config('services.eve-sso.esi_host');
+        $configuration->sso_host = config('services.eve-sso.sso_host');
         $configuration->datasource = 'tranquility';
         $configuration->logfile_location = storage_path() . '/logs';
         $configuration->file_cache_location = storage_path() . '/framework/cache';
@@ -100,8 +100,8 @@ class EsiConnection
             }
 
             $url = "https://$configuration->sso_host/v2/oauth/token";
-            $secret = env('EVEONLINE_CLIENT_SECRET');
-            $client_id = env('EVEONLINE_CLIENT_ID');
+            $secret = config('services.eve-sso.client_secret');
+            $client_id = config('services.eve-sso.client_id');
 
             // Need to request a new valid access token from EVE SSO using the refresh token of the original request.
             $response = Curl::to($url)

@@ -80,8 +80,8 @@ class AuthController extends Controller
         ]);
 
         // If an alliance is set, it must match the stored environment variable.
-        $allowedAlliances = explode(',', env('EVE_ALLIANCES_LOGIN'));
-        $allowedCorporations = explode(',', env('EVE_CORPORATIONS_LOGIN'));
+        $allowedAlliances = explode(',', config('eve.alliances_login'));
+        $allowedCorporations = explode(',', config('eve.corporations_login'));
         if (($character->corporation_id > 0 && in_array($character->corporation_id, $allowedCorporations))
             ||
             (

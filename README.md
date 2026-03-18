@@ -18,13 +18,13 @@ This application manages moon-mining revenue and invoicing for EVE Online corpor
 ## Installation Instructions
 
 * Create a database for the application.
-* You will need to import the following EVE dump tables into your database. They can be downloaded from
-  [Fuzzworks](https://www.fuzzwork.co.uk/dump/latest/).
-  * invTypes
-  * invTypeMaterials
-  * invUniqueNames
-  * mapSolarSystems
-  * mapRegions
+* Download the following EVE static data tables from [Fuzzworks](https://www.fuzzwork.co.uk/dump/latest/) as SQL files
+  and place them in `database/eve-static/`:
+  * `invTypes.sql`
+  * `invTypeMaterials.sql`
+  * `invUniqueNames.sql`
+  * `mapSolarSystems.sql`
+  * `mapRegions.sql`
 * Run `npm install` to install frontend dependencies.
 * Rename the `.env.example` file to `.env` and adjust values.
 * Run `composer install` to install backend dependencies.
@@ -38,11 +38,28 @@ See also https://laravel.com/docs/10.x/installation.
 
 You can use Docker to run the app.
 
+Copy the example override file before starting (required once per clone):
+```
+cp docker-compose.override.yml.example docker-compose.override.yml
+```
+
+`docker-compose.override.yml` is gitignored so you can customise it locally (e.g. port mappings, volume mounts) without affecting other developers. The example ships the Vite dev-server port mapping (`5173:5173`).
+
 Start the dev containers and shells:
 ```
 docker-compose up
 docker-compose exec moon_php /bin/sh
 docker-compose run moon_node /bin/sh
+```
+
+Import EVE static data (place SQL files in `database/eve-static/` first — see [Installation Instructions](#installation-instructions)):
+```
+docker-compose exec moon_php php artisan eve:import-static-data
+```
+
+To re-import a single table (e.g. after an EVE patch):
+```
+docker-compose exec moon_php php artisan eve:import-static-data --table=invTypes
 ```
 
 Generate files and annotations with the IDE Helper for Laravel:

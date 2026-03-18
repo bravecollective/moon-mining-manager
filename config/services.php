@@ -36,8 +36,10 @@ return [
     ],
 
     'eve-sso' => [
-        'client_id' => env('EVEONLINE_CLIENT_ID'),
+        'client_id'     => env('EVEONLINE_CLIENT_ID'),
         'client_secret' => env('EVEONLINE_CLIENT_SECRET'),
-        'redirect' => env('EVEONLINE_REDIRECT'),
+        'redirect'      => env('EVEONLINE_REDIRECT'),
+        'esi_host'      => env('EVEONLINE_ESI_HOST', 'esi.evetech.net'),
+        'sso_host'      => env('EVEONLINE_SSO_HOST', 'login.eveonline.com'),
     ]
 ];

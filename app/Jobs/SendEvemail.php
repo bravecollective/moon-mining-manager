@@ -38,7 +38,7 @@ class SendEvemail implements ShouldQueue
      */
     public function handle()
     {
-        $userId = env('MAIL_USER_ID', 0);
+        $userId = config('eve.mail_user_id');
         if ($userId <= 0) {
             Log::error(
                 'SendEvemail: cannot send mail to character ' .
@@ -92,11 +92,11 @@ class SendEvemail implements ShouldQueue
                 ($this->mail['recipients'][0]['recipient_id'] ?? 'none')
             );
             mail(
-                env('ADMIN_EMAIL'),
+                config('eve.admin_email'),
                 'Mining Manager rate limiter alert',
                 date('Y-m-d H:i:s') .
                 ' - SendEvemail: bounceback due to hitting the error rate limiter, dumping email job',
-                'From: ' . env('MAIL_FROM_NAME') . ' <' . env('MAIL_FROM_ADDRESS') . '>'
+                'From: ' . config('mail.from.name') . ' <' . config('mail.from.address') . '>'
             );
         } elseif (stristr($exception->getEsiResponse()->error, 'ContactCostNotApproved')) {
             // We want to ignore CSPA charge related errors, since they will never send successfully.

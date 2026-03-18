@@ -1,0 +1,131 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Relation 'invMoon' is not found in App\\\\Models\\\\Extraction model\\.$#"
+			count: 2
+			path: app/Http/Controllers/ExtractionsController.php
+
+		-
+			message: "#^Relation 'ore1' is not found in App\\\\Models\\\\Extraction model\\.$#"
+			count: 1
+			path: app/Http/Controllers/ExtractionsController.php
+
+		-
+			message: "#^Relation 'ore2' is not found in App\\\\Models\\\\Extraction model\\.$#"
+			count: 1
+			path: app/Http/Controllers/ExtractionsController.php
+
+		-
+			message: "#^Relation 'ore3' is not found in App\\\\Models\\\\Extraction model\\.$#"
+			count: 1
+			path: app/Http/Controllers/ExtractionsController.php
+
+		-
+			message: "#^Relation 'ore4' is not found in App\\\\Models\\\\Extraction model\\.$#"
+			count: 1
+			path: app/Http/Controllers/ExtractionsController.php
+
+		-
+			message: "#^Relation 'refinery' is not found in App\\\\Models\\\\Extraction model\\.$#"
+			count: 3
+			path: app/Http/Controllers/ExtractionsController.php
+
+		-
+			message: "#^Relation 'corporation' is not found in App\\\\Models\\\\Miner model\\.$#"
+			count: 1
+			path: app/Http/Controllers/MinerController.php
+
+		-
+			message: "#^Relation 'mineral_1' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 3
+			path: app/Http/Controllers/MoonAdminController.php
+
+		-
+			message: "#^Relation 'mineral_2' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 3
+			path: app/Http/Controllers/MoonAdminController.php
+
+		-
+			message: "#^Relation 'mineral_3' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 3
+			path: app/Http/Controllers/MoonAdminController.php
+
+		-
+			message: "#^Relation 'mineral_4' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 3
+			path: app/Http/Controllers/MoonAdminController.php
+
+		-
+			message: "#^Relation 'region' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 3
+			path: app/Http/Controllers/MoonAdminController.php
+
+		-
+			message: "#^Relation 'renter' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 3
+			path: app/Http/Controllers/MoonAdminController.php
+
+		-
+			message: "#^Relation 'system' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 3
+			path: app/Http/Controllers/MoonAdminController.php
+
+		-
+			message: "#^Relation 'mineral_1' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 1
+			path: app/Http/Controllers/MoonController.php
+
+		-
+			message: "#^Relation 'mineral_2' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 1
+			path: app/Http/Controllers/MoonController.php
+
+		-
+			message: "#^Relation 'mineral_3' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 1
+			path: app/Http/Controllers/MoonController.php
+
+		-
+			message: "#^Relation 'mineral_4' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 1
+			path: app/Http/Controllers/MoonController.php
+
+		-
+			message: "#^Relation 'region' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 1
+			path: app/Http/Controllers/MoonController.php
+
+		-
+			message: "#^Relation 'renter' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 1
+			path: app/Http/Controllers/MoonController.php
+
+		-
+			message: "#^Relation 'system' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 1
+			path: app/Http/Controllers/MoonController.php
+
+		-
+			message: "#^Relation 'region' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 1
+			path: app/Http/Controllers/RenterController.php
+
+		-
+			message: "#^Relation 'system' is not found in App\\\\Models\\\\Moon model\\.$#"
+			count: 1
+			path: app/Http/Controllers/RenterController.php
+
+		-
+			message: "#^Relation 'refinery' is not found in App\\\\Models\\\\MiningActivity model\\.$#"
+			count: 1
+			path: app/Jobs/ProcessMiningActivity.php
+
+		-
+			message: "#^Undefined variable\\: \\$table$#"
+			count: 2
+			path: database/migrations/2018_10_13_104150_adjust_moon_rental_amounts_to_integer.php
+
+		-
+			message: "#^Undefined variable\\: \\$this$#"
+			count: 1
+			path: routes/console.php

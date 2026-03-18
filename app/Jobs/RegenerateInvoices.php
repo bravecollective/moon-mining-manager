@@ -26,11 +26,11 @@ class RegenerateInvoices implements ShouldQueue
 
         // Build the WHERE clause to filter by alliance and/or corporation membership.
         $whitelist_where = [];
-        if (env('EVE_ALLIANCES_WHITELIST')) {
-            $whitelist_where[] = 'alliance_id IN (' . env('EVE_ALLIANCES_WHITELIST') . ')';
+        if (config('eve.alliances_whitelist')) {
+            $whitelist_where[] = 'alliance_id IN (' . config('eve.alliances_whitelist') . ')';
         }
-        if (env('EVE_CORPORATIONS_WHITELIST')) {
-            $whitelist_where[] = 'corporation_id IN (' . env('EVE_CORPORATIONS_WHITELIST') . ')';
+        if (config('eve.corporations_whitelist')) {
+            $whitelist_where[] = 'corporation_id IN (' . config('eve.corporations_whitelist') . ')';
         }
         if (count($whitelist_where)) {
             $whitelist_whereRaw = '(' . implode(' OR ', $whitelist_where) . ')';

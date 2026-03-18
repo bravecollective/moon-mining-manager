@@ -51,7 +51,7 @@ class SendRenterDelinquencyList implements ShouldQueue
             }
 
             // Output the details of this renter to the email body.
-            $url = env('APP_URL', '');
+            $url = config('app.url');
             $body .= "Renter: <url=showinfo:1376//$renter->character_id>$character->name</url>\n";
             $body .= "Refinery: <loc><url=$url$renter->refinery_id>$nameRented</url></loc>\n";
             $body .= 'Balance: ' . number_format($renter->amount_owed) . "ISK\n\n";
@@ -60,7 +60,7 @@ class SendRenterDelinquencyList implements ShouldQueue
             'body' => $body,
             'recipients' => array(
                 array(
-                    'recipient_id' => env('ADMIN_USER_ID', 0),
+                    'recipient_id' => config('eve.admin_user_id'),
                     'recipient_type' => 'character'
                 )
             ),
