@@ -1,5 +1,4 @@
-import '../sass/app.scss';
+import '../sass/public.scss';
 import './bootstrap';
 import 'tablesorter';
 import 'tablesorter/dist/js/widgets/widget-filter.min';
-import Chart from 'chart.js';

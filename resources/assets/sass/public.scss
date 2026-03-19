@@ -1,0 +1,6 @@
+// HMR test target — change $hmr-test-color and save to verify CSS hot update
+$hmr-test-color: #eee;
+
+th {
+    background: $hmr-test-color;
+}

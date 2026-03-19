@@ -237,6 +237,8 @@
 
         </style>
 
+        @vite(['resources/assets/js/public.js'])
+
     </head>
 
     <body class="@yield('body-class')">
@@ -245,7 +247,6 @@
 
         @yield('content')
 
-        <script src="/js/app.js"></script>
     </body>
 
 </html>

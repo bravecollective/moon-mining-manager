@@ -10,7 +10,7 @@
 
         <title>@yield('title') &#0183; Moon Mining Manager</title>
 
-        <link rel="stylesheet" href="/css/app.css">
+        @vite(['resources/assets/js/app.js'])
 
     </head>
 
@@ -39,8 +39,6 @@
             </div>
 
         </div>
-
-        <script src="/js/app.js"></script>
 
     </body>
 

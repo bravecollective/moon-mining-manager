@@ -1,0 +1,3 @@
+services:
+  moon_node:
+    ports: ['5173:5173']
