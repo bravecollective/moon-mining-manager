@@ -85,7 +85,8 @@ class AppController extends Controller
             'top_miner' => (isset($top_miner)) ? $top_miner : null,
             'top_refinery' => (isset($top_refinery)) ? $top_refinery : null,
             'top_system' => (isset($top_system)) ? $top_system : null,
-            'miners' => Miner::where('amount_owed', '>=', 1)->whereRaw($whitelist_whereRaw)
+            'miners' => Miner::where('amount_owed', '>=', 1)
+                ->when($whitelist_whereRaw, fn($q) => $q->whereRaw($whitelist_whereRaw))
                 ->orderBy('amount_owed', 'desc')->get(),
             'ninjas' => $blacklist_whereRaw ? Miner::whereRaw($blacklist_whereRaw)->limit(100)->get() : [],
             'total_amount_owed' => $total_amount_owed ? $total_amount_owed->total : 0,
