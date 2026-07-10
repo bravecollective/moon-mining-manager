@@ -67,7 +67,6 @@
                     <th>Total %</th>
                     <th class="numeric">Rent (Active)</th>
                     <th class="numeric">Rent (Passive)</th>
-                    <th>Available On</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -108,11 +107,6 @@
                         </td>
                         <td class="numeric">{{ number_format($moon->monthly_rental_fee) }}</td>
                         <td class="numeric">{{ number_format($moon->monthly_corp_rental_fee) }}</td>
-                        <td>
-                          @if ($renter = $moon->getActiveRenterAttribute())
-                            {{ ($renter->end_date)? $renter->end_date : date('Y-m-d', strtotime($renter->start_date . ' + 183 days')) }}
-                          @endif
-                        </td>
                         <td>
                             {{ match($moon->status_flag) {
                                 \App\Models\Moon::STATUS_ALLIANCE_OWNED => 'Alliance owned',
