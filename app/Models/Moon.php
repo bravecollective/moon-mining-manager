@@ -81,7 +81,7 @@ class Moon extends Model
      */
     public function system()
     {
-        return $this->belongsTo('App\Models\SolarSystem', 'solar_system_id');
+        return $this->belongsTo(SolarSystem::class, 'solar_system_id');
     }
 
     /**
@@ -89,7 +89,7 @@ class Moon extends Model
      */
     public function region()
     {
-        return $this->belongsTo('App\Models\Region', 'region_id');
+        return $this->belongsTo(Region::class, 'region_id');
     }
 
     /**
@@ -97,7 +97,7 @@ class Moon extends Model
      */
     public function renter()
     {
-        return $this->hasMany('App\Models\Renter', 'moon_id', 'id');
+        return $this->hasMany(Renter::class, 'moon_id', 'id');
     }
 
     /**
@@ -123,22 +123,22 @@ class Moon extends Model
      */
     public function mineral_1()
     {
-        return $this->belongsTo('App\Models\Type', 'mineral_1_type_id');
+        return $this->belongsTo(Type::class, 'mineral_1_type_id');
     }
 
     public function mineral_2()
     {
-        return $this->belongsTo('App\Models\Type', 'mineral_2_type_id');
+        return $this->belongsTo(Type::class, 'mineral_2_type_id');
     }
 
     public function mineral_3()
     {
-        return $this->belongsTo('App\Models\Type', 'mineral_3_type_id');
+        return $this->belongsTo(Type::class, 'mineral_3_type_id');
     }
 
     public function mineral_4()
     {
-        return $this->belongsTo('App\Models\Type', 'mineral_4_type_id');
+        return $this->belongsTo(Type::class, 'mineral_4_type_id');
     }
 
     public function getName(bool $withRegionName = true): string

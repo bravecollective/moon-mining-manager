@@ -58,7 +58,7 @@ class Renter extends Model
      */
     public function refinery()
     {
-        return $this->hasOne('App\Models\Refinery', 'observer_id', 'refinery_id');
+        return $this->hasOne(Refinery::class, 'observer_id', 'refinery_id');
     }
 
     /**
@@ -66,12 +66,12 @@ class Renter extends Model
      */
     public function moon()
     {
-        return $this->hasOne('App\Models\Moon', 'id', 'moon_id');
+        return $this->hasOne(Moon::class, 'id', 'moon_id');
     }
 
     public function updatedBy()
     {
-        return $this->belongsTo('App\Models\User', 'updated_by', 'eve_id');
+        return $this->belongsTo(User::class, 'updated_by', 'eve_id');
     }
 
     /**

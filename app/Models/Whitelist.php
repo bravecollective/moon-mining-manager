@@ -30,7 +30,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Whitelist extends Model
 {
-    
+
     protected $table = 'whitelist';
 
     /**
@@ -38,7 +38,7 @@ class Whitelist extends Model
      */
     public function user()
     {
-        return $this->belongsTo('App\Models\User', 'eve_id', 'eve_id');
+        return $this->belongsTo(User::class, 'eve_id', 'eve_id');
     }
 
     /**
@@ -46,7 +46,7 @@ class Whitelist extends Model
      */
     public function whitelister()
     {
-        return $this->belongsTo('App\Models\User', 'added_by', 'eve_id');
+        return $this->belongsTo(User::class, 'added_by', 'eve_id');
     }
 
 }

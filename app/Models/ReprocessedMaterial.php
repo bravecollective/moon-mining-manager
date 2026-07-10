@@ -32,11 +32,11 @@ class ReprocessedMaterial extends Model
 
     public function type()
     {
-        return $this->hasOne('App\Models\Type', 'typeID', 'materialTypeID');
+        return $this->hasOne(Type::class, 'typeID', 'materialTypeID');
     }
 
     public function history()
     {
-        return $this->hasMany('App\Models\ReprocessedMaterialsHistory', 'type_id', 'materialTypeID');
+        return $this->hasMany(ReprocessedMaterialsHistory::class, 'type_id', 'materialTypeID');
     }
 }

@@ -29,6 +29,6 @@ class ReprocessedMaterialsHistory extends Model
 
     public function reprocessed_material()
     {
-        return $this->belongsTo('App\Models\ReprocessedMaterial', 'materialTypeID');
+        return $this->belongsTo(ReprocessedMaterial::class, 'materialTypeID');
     }
 }

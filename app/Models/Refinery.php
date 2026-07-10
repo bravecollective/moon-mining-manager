@@ -60,7 +60,7 @@ class Refinery extends Model
      */
     public function mining_activity()
     {
-        return $this->hasMany('App\Models\MiningActivity', 'refinery_id', 'observer_id');
+        return $this->hasMany(MiningActivity::class, 'refinery_id', 'observer_id');
     }
 
     /**
@@ -68,7 +68,7 @@ class Refinery extends Model
      */
     public function system()
     {
-        return $this->belongsTo('App\Models\SolarSystem', 'solar_system_id');
+        return $this->belongsTo(SolarSystem::class, 'solar_system_id');
     }
 
     /**
@@ -76,7 +76,7 @@ class Refinery extends Model
      */
     public function primary()
     {
-        return $this->belongsTo('App\Models\User', 'claimed_by_primary', 'eve_id');
+        return $this->belongsTo(User::class, 'claimed_by_primary', 'eve_id');
     }
 
     /**
@@ -84,11 +84,11 @@ class Refinery extends Model
      */
     public function secondary()
     {
-        return $this->belongsTo('App\Models\User', 'claimed_by_secondary', 'eve_id');
+        return $this->belongsTo(User::class, 'claimed_by_secondary', 'eve_id');
     }
 
     public function corporation()
     {
-        return $this->belongsTo('App\Models\Corporation', 'corporation_id', 'corporation_id');
+        return $this->belongsTo(Corporation::class, 'corporation_id', 'corporation_id');
     }
 }

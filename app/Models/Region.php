@@ -54,12 +54,12 @@ class Region extends Model
 
     public function systems()
     {
-        return $this->hasMany('App\Models\SolarSystem', 'regionID');
+        return $this->hasMany(SolarSystem::class, 'regionID');
     }
 
     public function moons()
     {
-        return $this->hasMany('App\Models\Moon');
+        return $this->hasMany(Moon::class);
     }
 
 }

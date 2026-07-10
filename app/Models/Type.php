@@ -46,7 +46,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Type extends Model
 {
-    
+
     protected $table = 'invTypes';
     protected $primaryKey = 'typeID';
     public $incrementing = false;
@@ -54,7 +54,7 @@ class Type extends Model
 
     public function type_materials()
     {
-        return $this->hasMany('App\Models\TypeMaterial', 'typeID', 'typeID');
+        return $this->hasMany(TypeMaterial::class, 'typeID', 'typeID');
     }
 
 }
