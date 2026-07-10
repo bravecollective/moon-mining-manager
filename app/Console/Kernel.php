@@ -30,7 +30,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        'App\Console\Commands\RunJob'
+        'App\Console\Commands\RunJob',
+        'App\Console\Commands\ImportEveStaticData',
     ];
 
     /**
