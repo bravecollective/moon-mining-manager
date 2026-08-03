@@ -9,13 +9,15 @@
         <div class="col-12">
             <table id="miners">
                 <thead>
-                    <th>Miner</th>
-                    <th>Corporation</th>
-                    <th class="numeric">Amount owed</th>
-                    <th class="numeric">Total payments</th>
-                    <th>Last mining date</th>
-                    <th>Last invoice date</th>
-                    <th>Last payment date</th>
+                    <tr>
+                        @include('miners._sortable-header', ['column' => 'name', 'label' => 'Miner'])
+                        @include('miners._sortable-header', ['column' => 'corporation', 'label' => 'Corporation'])
+                        @include('miners._sortable-header', ['column' => 'amount_owed', 'label' => 'Amount owed', 'class' => 'numeric'])
+                        @include('miners._sortable-header', ['column' => 'total_payments', 'label' => 'Total payments', 'class' => 'numeric'])
+                        @include('miners._sortable-header', ['column' => 'latest_mining_activity', 'label' => 'Last mining date'])
+                        @include('miners._sortable-header', ['column' => 'latest_invoice', 'label' => 'Last invoice date'])
+                        @include('miners._sortable-header', ['column' => 'latest_payment', 'label' => 'Last payment date'])
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach ($miners as $miner)
@@ -53,9 +55,10 @@
     <script>
 
         window.addEventListener('load', function () {
-            $('#miners').tablesorter();
-            $('#miners tr').on('click', function () {
-                $(this).find('a')[0].click();
+            $('#miners tbody tr').on('click', function (event) {
+                if ($(event.target).closest('a').length === 0) {
+                    $(this).find('a')[0].click();
+                }
             });
         });
 

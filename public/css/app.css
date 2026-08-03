@@ -860,6 +860,22 @@ table {
   color: #242626;
 }
 
+#miners th.sortable-header {
+  padding: 0;
+}
+
+#miners th.sortable-header a {
+  color: #fff;
+  display: block;
+  padding: 10px;
+}
+
+#miners th.sortable-header a:focus,
+#miners th.sortable-header a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
 #miningActivity tr:hover td,
 #miners tr:hover td {
   background: #408077;
@@ -1068,4 +1084,3 @@ ul.pagination .disabled {
 ul.pagination .active {
   color: #408077;
 }
-

@@ -8,6 +8,22 @@ table {
     color: $text;
 }
 
+#miners th.sortable-header {
+    padding: 0;
+
+    a {
+        color: #fff;
+        display: block;
+        padding: 10px;
+
+        &:focus,
+        &:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+    }
+}
+
 #miningActivity tr:hover td,
 #miners tr:hover td {
     background: $highlight;
