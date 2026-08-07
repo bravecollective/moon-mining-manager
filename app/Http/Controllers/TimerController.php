@@ -36,7 +36,8 @@ class TimerController extends Controller
             }
 
             // Retrieve all history of the miner's mining, invoices and payments.
-            $mining_activities = MiningActivity::where('miner_id', $miner->eve_id)->get();
+            $mining_activities = MiningActivity::with(['refinery.system', 'type'])
+                ->where('miner_id', $miner->eve_id)->get();
             $invoices = Invoice::where('miner_id', $miner->eve_id)->get();
             $payments = Payment::where('miner_id', $miner->eve_id)->get();
 

@@ -133,25 +133,7 @@
             </h2>
             <ul id="activity-log">
                 @foreach ($activity_log as $event)
-                    <li>
-                        {{ date('Y-m-d H:i', strtotime($event->updated_at)) }} -
-                        @if (isset($event->amount))
-                            Invoice sent for {{ number_format($event->amount) }} ISK
-                        @endif
-                        @if (isset($event->quantity))
-                            @php
-                                $refinery = \App\Models\Refinery::where('observer_id', $event->refinery_id)->first();
-                            @endphp
-                            Mining recorded in {{ $refinery->system->solarSystemName }}
-                            ({{ number_format($event->quantity, 0) }} units)
-                            @if (isset($event->tax_amount))
-                                ~ {{ number_format($event->tax_amount) }} ISK
-                            @endif
-                        @endif
-                        @if (isset($event->amount_received))
-                            Payment received for {{ number_format($event->amount_received) }} ISK
-                        @endif
-                    </li>
+                    @include('blocks.mining-activity-log-entry')
                 @endforeach
             </ul>
         </div>
