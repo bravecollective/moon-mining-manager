@@ -7,6 +7,7 @@ use App\Models\Miner;
 use App\Models\Invoice;
 use App\Models\MiningActivity;
 use App\Models\Payment;
+use Illuminate\Http\Request;
 
 class MinerController extends Controller
 {
@@ -14,10 +15,27 @@ class MinerController extends Controller
     /**
      * List all miners together with their total payments.
      */
-    public function showMiners()
+    public function showMiners(Request $request)
     {
+        $search = trim((string) $request->query('search', ''));
+
+        $miners = Miner::with('corporation')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+
+                    if (ctype_digit($search)) {
+                        $query->orWhere('eve_id', $search);
+                    }
+                });
+            })
+            ->orderBy('name')
+            ->paginate(250)
+            ->withQueryString();
+
         return view('miners.all', [
-            'miners' => Miner::with('corporation')->orderBy('name')->paginate(250),
+            'miners' => $miners,
+            'search' => $search,
         ]);
     }
 
