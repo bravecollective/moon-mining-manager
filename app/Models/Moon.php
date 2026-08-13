@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -77,6 +78,84 @@ class Moon extends Model
     const STATUS_RESERVED = 3;
 
     /**
+     * The four columns holding a moon's composition.
+     */
+    public const MINERAL_COLUMNS = [
+        'mineral_1_type_id',
+        'mineral_2_type_id',
+        'mineral_3_type_id',
+        'mineral_4_type_id',
+    ];
+
+    /**
+     * Moon materials, the reason a moon is worth renting. Names as they appear in `invTypes`.
+     */
+    public const MOON_MATERIALS = [
+        'Bitumens', 'Coesite', 'Sylvite', 'Zeolites',
+        'Cobaltite', 'Euxenite', 'Scheelite', 'Titanite',
+        'Chromite', 'Otavite', 'Sperrylite', 'Vanadinite',
+        'Carnotite', 'Cinnabar', 'Pollucite', 'Zircon',
+        'Loparite', 'Monazite', 'Xenotime', 'Ytterbite',
+    ];
+
+    /**
+     * Moon IDs with a rental running today, as a subquery.
+     *
+     * `renters` carries no index on `moon_id` and this does not add one, so the goal is to read
+     * that table exactly once per request. DISTINCT stops MariaDB merging the subquery into the
+     * outer statement: it is materialised once, and derived_with_keys then indexes the
+     * materialised result for the join back to `moons`.
+     */
+    protected static function activeRentals(): Builder
+    {
+        return Renter::query()
+            ->select('moon_id')
+            ->distinct()
+            ->whereNotNull('moon_id')
+            ->active();
+    }
+
+    /**
+     * Restrict to moons nobody is renting today.
+     */
+    public function scopeWithoutActiveRenter(Builder $query): Builder
+    {
+        return $query
+            ->select('moons.*')
+            ->leftJoinSub(static::activeRentals(), 'active_rentals', 'active_rentals.moon_id', '=', 'moons.id')
+            ->whereNull('active_rentals.moon_id');
+    }
+
+    /**
+     * Restrict to moons somebody is renting today. DISTINCT in the subquery keeps this from
+     * duplicating a moon that somehow has two overlapping rentals.
+     */
+    public function scopeWithActiveRenter(Builder $query): Builder
+    {
+        return $query
+            ->select('moons.*')
+            ->joinSub(static::activeRentals(), 'active_rentals', 'active_rentals.moon_id', '=', 'moons.id');
+    }
+
+    /**
+     * Restrict to moons whose composition includes any of the given mineral types.
+     */
+    public function scopeContainsType(Builder $query, array $typeIds): Builder
+    {
+        if ($typeIds === []) {
+            return $query;
+        }
+
+        // The closure is load bearing. Without it the ORs bind looser than the surrounding ANDs
+        // and `available = 1` stops applying, leaking unavailable moons into the results.
+        return $query->where(function (Builder $group) use ($typeIds) {
+            foreach (self::MINERAL_COLUMNS as $column) {
+                $group->orWhereIn($column, $typeIds);
+            }
+        });
+    }
+
+    /**
      * Get the solar system where this moon is located.
      */
     public function system()
@@ -102,6 +181,9 @@ class Moon extends Model
 
     /**
      * Find any active renter.
+     *
+     * Same test as Renter::scopeActive(), applied in PHP over an already loaded relation.
+     * Change both together.
      */
     public function getActiveRenterAttribute()
     {
