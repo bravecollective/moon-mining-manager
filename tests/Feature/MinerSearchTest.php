@@ -63,6 +63,16 @@ class MinerSearchTest extends TestCase
         $this->assertSame('Alpha', $view->getData()['search']);
     }
 
+    public function testItSearchesMinerNamesCaseInsensitively(): void
+    {
+        $view = $this->showMiners(['search' => 'alpha']);
+
+        $this->assertSame(
+            ['Alpha Miner', 'Another Alpha'],
+            $view->getData()['miners']->pluck('name')->all()
+        );
+    }
+
     public function testItSearchesMinersByExactCharacterId(): void
     {
         $view = $this->showMiners(['search' => '1002']);
