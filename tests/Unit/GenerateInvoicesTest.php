@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Jobs\GenerateInvoice;
 use App\Jobs\GenerateInvoices;
+use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
@@ -32,36 +33,27 @@ class GenerateInvoicesTest extends TestCase
             $table->timestamps();
         });
 
-        Schema::create('mining_activities', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('miner_id');
-            $table->timestamps();
-        });
-
         config()->set('eve.alliances_whitelist', '1');
         config()->set('eve.corporations_whitelist');
         Bus::fake();
     }
 
-    public function test_recently_active_miners_are_invoiced_first(): void
+    protected function tearDown(): void
     {
+        Carbon::setTestNow();
+
+        parent::tearDown();
+    }
+
+    public function test_recent_miners_are_invoiced_by_latest_update_and_stale_miners_are_skipped(): void
+    {
+        Carbon::setTestNow('2026-08-14 12:00:00');
+
         DB::table('miners')->insert([
             $this->miner(1001, '2026-08-01 00:00:00'),
             $this->miner(1002, '2026-08-10 00:00:00'),
             $this->miner(1003, '2026-07-01 00:00:00'),
-        ]);
-
-        DB::table('mining_activities')->insert([
-            [
-                'miner_id' => 1001,
-                'created_at' => '2026-08-05 00:00:00',
-                'updated_at' => '2026-08-05 00:00:00',
-            ],
-            [
-                'miner_id' => 1003,
-                'created_at' => '2026-08-11 00:00:00',
-                'updated_at' => '2026-08-11 00:00:00',
-            ],
+            $this->miner(1004, '2025-08-13 00:00:00'),
         ]);
 
         (new GenerateInvoices)->handle();
@@ -70,7 +62,7 @@ class GenerateInvoicesTest extends TestCase
             ->map(fn (GenerateInvoice $job) => $this->jobMinerId($job))
             ->all();
 
-        $this->assertSame([1003, 1002, 1001], $ids);
+        $this->assertSame([1002, 1001, 1003], $ids);
     }
 
     private function miner(int $eveId, string $updatedAt): array
