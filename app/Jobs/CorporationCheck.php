@@ -18,6 +18,7 @@ class CorporationCheck implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 1;
+    public $timeout = 3 * 60;
 
     private $ids;
     private $conn;

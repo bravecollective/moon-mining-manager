@@ -25,7 +25,7 @@ class CorporationChecks implements ShouldQueue
         // Grab all of the miner records we have, and loop through them all to queue jobs
         // to check their corporation membership.
         $miners = Miner::orderBy('eve_id', 'ASC')->get();
-        $chunk_size = 500;
+        $chunk_size = 1000;
 
         $delay_counter = 1;
 
