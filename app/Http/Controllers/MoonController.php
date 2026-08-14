@@ -75,7 +75,7 @@ class MoonController extends Controller
 
         $query
             ->when($filters['region'], fn (Builder $q, int $regionId) => $q->where('region_id', $regionId))
-            ->when($filters['system'], fn (Builder $q, string $name) => $q->whereIn('solar_system_id', $this->systemIds($name)))
+            ->when($filters['system'], fn (Builder $q, string $name) => $q->whereIn('solar_system_id', $this->systemIdsByName($name)))
             ->when($filters['mineral'], fn (Builder $q, array $typeIds) => $q->containsType($typeIds));
 
         $this->applySort($query, $filters);
@@ -112,9 +112,9 @@ class MoonController extends Controller
         $region = (int) $this->stringParam($request, 'region');
 
         return [
-            'status'  => isset(self::STATUS_LABELS[$status]) ? $status : 'available',
-            'sort'    => $sort === 'total' || isset(self::SORTS[$sort]) ? $sort : 'region',
-            'dir'     => strtolower($this->stringParam($request, 'dir')) === 'desc' ? 'desc' : 'asc',
+            'status'  => (isset(self::STATUS_LABELS[$status])) ? $status : 'available',
+            'sort'    => ($sort === 'total' || isset(self::SORTS[$sort])) ? $sort : 'region',
+            'dir'     => (strtolower($this->stringParam($request, 'dir')) === 'desc') ? 'desc' : 'asc',
             'region'  => $region ?: null,
             'system'  => $this->stringParam($request, 'system') ?: null,
             'mineral' => $this->mineralParam($request),
@@ -125,7 +125,7 @@ class MoonController extends Controller
     {
         $value = $request->query($key);
 
-        return is_scalar($value) ? trim((string) $value) : '';
+        return (is_scalar($value)) ? trim((string) $value) : '';
     }
 
     /**
@@ -182,7 +182,7 @@ class MoonController extends Controller
      * Solar system IDs whose name starts with the search term. `mapSolarSystems` is small and
      * static, so one prefix scan per request beats joining it into the main query.
      */
-    private function systemIds(string $name)
+    private function systemIdsByName(string $name)
     {
         return DB::table('mapSolarSystems')
             ->where('solarSystemName', 'like', addcslashes($name, '%_\\').'%')
@@ -208,12 +208,18 @@ class MoonController extends Controller
      * composition also carries ordinary ore, but nobody picks a rental by its Veldspar content.
      * A DISTINCT across the four mineral columns would cost four scans of `moons`; this costs
      * one of `invTypes`.
+     *
+     * Listed in the constant's own order, which is rarity ascending. `invTypes` carries nothing to
+     * sort on that recovers it, so the ordering is applied in PHP over twenty rows.
      */
     private function mineralOptions()
     {
+        $rarity = array_flip(Moon::MOON_MATERIALS);
+
         return Type::query()
             ->whereIn('typeName', Moon::MOON_MATERIALS)
-            ->orderBy('typeName')
-            ->get(['typeID', 'typeName']);
+            ->get(['typeID', 'typeName'])
+            ->sortBy(fn (Type $type) => $rarity[$type->typeName] ?? PHP_INT_MAX)
+            ->values();
     }
 }

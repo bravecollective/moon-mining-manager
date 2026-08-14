@@ -89,6 +89,9 @@ class Moon extends Model
 
     /**
      * Moon materials, the reason a moon is worth renting. Names as they appear in `invTypes`.
+     *
+     * Order is significant: R4, R8, R16, R32, R64, four to a line, and the mineral filter renders
+     * them in it. Keep new entries in their rarity group rather than sorting the list.
      */
     public const MOON_MATERIALS = [
         'Bitumens', 'Coesite', 'Sylvite', 'Zeolites',

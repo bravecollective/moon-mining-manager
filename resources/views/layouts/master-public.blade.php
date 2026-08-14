@@ -166,7 +166,11 @@
                 top: 100%;
                 left: 0;
                 z-index: 10;
-                grid-template-columns: repeat(5, max-content);
+                /* Filling down rather than across puts each rarity group in its own column:
+                   R4, R8, R16, R32, R64, left to right. */
+                grid-auto-flow: column;
+                grid-template-rows: repeat(4, max-content);
+                grid-auto-columns: max-content;
                 gap: 6px 24px;
                 padding: 12px 16px;
                 background: #fff;

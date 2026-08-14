@@ -13,8 +13,8 @@
         ));
     };
 
-    $sortArrow = fn (string $key) => $filters['sort'] === $key
-        ? ($filters['dir'] === 'asc' ? ' ▲' : ' ▼')
+    $sortArrow = fn (string $key) => ($filters['sort'] === $key)
+        ? (($filters['dir'] === 'asc') ? ' ▲' : ' ▼')
         : '';
 @endphp
 
