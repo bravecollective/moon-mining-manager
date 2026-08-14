@@ -22,21 +22,21 @@ class CorporationChecks implements ShouldQueue
      */
     public function handle()
     {
-
         // Grab all of the miner records we have, and loop through them all to queue jobs
         // to check their corporation membership.
-        $miners = Miner::all();
-
-        Log::info('CorporationChecks: found ' . count($miners) . ' miners in the database');
+        $miners = Miner::orderBy('eve_id', 'ASC')->get();
+        $chunk_size = 500;
 
         $delay_counter = 1;
 
         // break up the miners into pages of 1k results
-        $pages = $this->paginateIterable($miners);
+        $pages = $this->paginateIterable($miners, $chunk_size);
 
         foreach ($pages as $page) {
             // we need an array of id ints
             $ids = array_map(fn($miner) => intval($miner->eve_id), $page);
+
+            Log::info('CorporationChecks: chunking miners', ['count' => count($miners), 'chunk_size' => count($ids), 'chunk_number' => $delay_counter]);
 
             CorporationCheck::dispatch($ids)->delay(Carbon::now()->addSecond(15 * $delay_counter));
 
