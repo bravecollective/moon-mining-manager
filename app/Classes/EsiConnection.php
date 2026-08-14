@@ -84,7 +84,7 @@ class EsiConnection
     {
         // Eseye configuration for all connections
         $configuration = Configuration::getInstance();
-        $configuration->http_client = 'GuzzleHttp\Client';
+        $configuration->http_client = '\GuzzleHttp\Client';
         $configuration->esi_host = config('services.eve-sso.esi_host');
         $configuration->sso_host = config('services.eve-sso.sso_host');
         $configuration->datasource = 'tranquility';
