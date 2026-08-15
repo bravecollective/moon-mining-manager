@@ -160,6 +160,27 @@ class MinerSortingTest extends TestCase
         $this->assertSame(2, $miners->lastPage());
     }
 
+    public function testItCombinesSearchAndSorting(): void
+    {
+        $request = Request::create('/miners', 'GET', [
+            'search' => 'Miner',
+            'sort' => 'amount_owed',
+            'direction' => 'desc',
+        ]);
+        $this->app->instance('request', $request);
+
+        $view = (new MinerController())->showMiners($request);
+        $miners = $view->getData()['miners'];
+
+        $this->assertSame(
+            ['Bravo Miner', 'Alpha Miner', 'Charlie Miner'],
+            $miners->pluck('name')->all()
+        );
+        $this->assertStringContainsString('search=Miner', $miners->url(2));
+        $this->assertStringContainsString('sort=amount_owed', $miners->url(2));
+        $this->assertStringContainsString('direction=desc', $miners->url(2));
+    }
+
     public function testItFallsBackToSafeSortParameters(): void
     {
         $view = (new MinerController())->showMiners(Request::create('/miners', 'GET', [

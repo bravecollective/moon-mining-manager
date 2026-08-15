@@ -37,8 +37,18 @@ class MinerController extends Controller
         $sort = $request->query('sort', 'name');
         $sort = is_string($sort) && array_key_exists($sort, $sortColumns) ? $sort : 'name';
         $direction = $request->query('direction') === 'desc' ? 'desc' : 'asc';
+        $search = trim((string) $request->query('search', ''));
 
         $miners = Miner::with('corporation')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+
+                    if (ctype_digit($search)) {
+                        $query->orWhere('eve_id', $search);
+                    }
+                });
+            })
             ->orderBy($sortColumns[$sort], $direction)
             ->when($sort !== 'name', fn ($query) => $query->orderBy('miners.name'))
             ->orderBy('miners.eve_id')
@@ -49,6 +59,7 @@ class MinerController extends Controller
             'miners' => $miners,
             'sort' => $sort,
             'direction' => $direction,
+            'search' => $search,
         ]);
     }
 

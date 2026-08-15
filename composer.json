@@ -69,6 +69,14 @@
         "allow-plugins": {
             "kylekatarnls/update-helper": true,
             "frontpack/composer-assets-plugin": true
+        },
+        "audit": {
+            "abandoned": "report"
+        },
+        "policy": {
+            "advisories": {
+                "block": false
+            }
         }
     }
 }
