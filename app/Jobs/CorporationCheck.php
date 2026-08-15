@@ -63,7 +63,8 @@ class CorporationCheck implements ShouldQueue
             );
         }
 
-        // The above loop is currently the long pole for this job. frequently taking 40+ seconds
+        // The above loop is currently the long pole for this job, frequently taking 40+ seconds.
+        // Unfortunately, we still need to query all the corps in case their alliance changes.
         Log::info('CorporationCheck: done fetching corp data', ['t' => microtime(true)-$start]);
 
         $changed_miners = 0;
@@ -137,9 +138,11 @@ class CorporationCheck implements ShouldQueue
             }
 
             if (!isset($corporation->alliance_id)) {
-                $changed = true;
-                $miner->alliance_id = null;
-                $ctx['new_alliance_id'] = null;
+                if (isset($miner->alliance_id)) {
+                    $changed = true;
+                    $miner->alliance_id = null;
+                    $ctx['new_alliance_id'] = null;
+                }
             } else if ($miner->alliance_id != $corporation->alliance_id) {
                 $changed = true;
                 $miner->alliance_id = $corporation->alliance_id;
