@@ -1,24 +1,35 @@
 ul.pagination {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 4px;
   list-style: none;
   justify-content: center;
 
-  a {
-    text-decoration: none;
+  a, span {
+    display: block;
+    min-width: 32px;
+    padding: 4px 8px;
     color: $text;
-
-    &:hover {
-      opacity: 0.5;
-    }
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    border-radius: 3px;
   }
 
-  .disabled {
+  a:hover {
+    background: #eee;
+  }
+
+  .disabled span {
+    color: #999;
+    border-color: transparent;
     cursor: not-allowed;
-    opacity: 0.5;
   }
 
-  .active {
-    color: $highlight;
+  .active span {
+    background: $highlight;
+    color: #fff;
+    border-color: $highlight;
+    font-weight: bold;
   }
 }

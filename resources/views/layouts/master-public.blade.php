@@ -62,13 +62,216 @@
                 width: 90%;
             }
 
-            form.external-filters {
+            /* Table navigation: filters on the left, record count and pagination on the right,
+               above and below the table. */
+
+            .table-nav {
                 width: 90%;
                 margin: 20px auto;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-end;
+                justify-content: space-between;
+                gap: 12px 20px;
             }
 
-            form.external-filters .external-filter {
-                margin-right: 20px;
+            .table-nav .pagination-nav {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: flex-end;
+                gap: 6px 12px;
+                margin-left: auto;
+            }
+
+            .table-nav .count {
+                font-size: 12px;
+                color: #767a7a;
+                white-space: nowrap;
+            }
+
+            .table-nav ul.pagination {
+                margin: 0;
+            }
+
+            /* Filters. This layout loads no stylesheet, so the rules in
+               resources/assets/sass/forms.scss never reach it. */
+
+            form.external-filters {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-end;
+                gap: 12px 20px;
+            }
+
+            form.external-filters .filter-field {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            form.external-filters label,
+            form.external-filters .filter-label {
+                font-size: 12px;
+                font-weight: bold;
+            }
+
+            form.external-filters .hint {
+                font-weight: normal;
+                color: #767a7a;
+            }
+
+            form.external-filters input[type="text"],
+            form.external-filters select {
+                font: inherit;
+                padding: 6px 8px;
+                background: #fff;
+                color: #242626;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+            }
+
+            /* Minerals. A hover or focus panel rather than a disclosure, so opening it does not
+               reflow the bar it sits in. :focus-within covers keyboard and touch, where there
+               is no hover to speak of. */
+
+            form.external-filters .mineral-filter {
+                position: relative;
+            }
+
+            form.external-filters .mineral-toggle {
+                font: inherit;
+                padding: 6px 12px;
+                background: #fff;
+                color: #242626;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+                text-align: left;
+                cursor: pointer;
+            }
+
+            form.external-filters .mineral-filter:hover .mineral-toggle,
+            form.external-filters .mineral-filter:focus-within .mineral-toggle {
+                border-color: #408077;
+            }
+
+            form.external-filters .mineral-toggle::after {
+                content: ' \25BE';
+                color: #767a7a;
+            }
+
+            form.external-filters .mineral-panel {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                z-index: 10;
+                /* Filling down rather than across puts each rarity group in its own column:
+                   R4, R8, R16, R32, R64, left to right. */
+                grid-auto-flow: column;
+                grid-template-rows: repeat(4, max-content);
+                grid-auto-columns: max-content;
+                gap: 6px 24px;
+                padding: 12px 16px;
+                background: #fff;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            form.external-filters .mineral-filter:hover .mineral-panel,
+            form.external-filters .mineral-filter:focus-within .mineral-panel {
+                display: grid;
+            }
+
+            form.external-filters .mineral-panel label {
+                font-size: inherit;
+                font-weight: normal;
+                white-space: nowrap;
+                cursor: pointer;
+            }
+
+            form.external-filters .filter-actions {
+                display: flex;
+                gap: 10px;
+            }
+
+            form.external-filters .filter-actions button,
+            form.external-filters .reset {
+                font: inherit;
+                line-height: 20px;
+                padding: 6px 18px;
+                background: #408077;
+                color: #fff;
+                border: 1px solid #408077;
+                border-radius: 20px;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            form.external-filters .reset {
+                background: none;
+                color: #408077;
+            }
+
+            form.external-filters .filter-actions button:hover {
+                background: #33665f;
+                border-color: #33665f;
+            }
+
+            form.external-filters .reset:hover {
+                background: #eef3f2;
+            }
+
+            /* Pagination. Same again, against
+               resources/assets/sass/pagination.scss. Keep the two in step. */
+
+            ul.pagination {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+                list-style: none;
+                justify-content: center;
+                margin: 20px auto;
+                padding: 0;
+            }
+
+            ul.pagination a,
+            ul.pagination span {
+                display: block;
+                min-width: 32px;
+                padding: 4px 8px;
+                color: #242626;
+                text-align: center;
+                text-decoration: none;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+            }
+
+            ul.pagination a:hover {
+                background: #eee;
+            }
+
+            ul.pagination .disabled span {
+                color: #999;
+                border-color: transparent;
+                cursor: not-allowed;
+            }
+
+            ul.pagination .active span {
+                background: #408077;
+                color: #fff;
+                border-color: #408077;
+                font-weight: bold;
+            }
+
+            table.moons th a {
+                color: inherit;
+                text-decoration: none;
+            }
+
+            table.moons th a:hover {
+                text-decoration: underline;
             }
 
             th, td {

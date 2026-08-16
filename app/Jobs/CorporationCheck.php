@@ -17,7 +17,8 @@ class CorporationCheck implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $tries = 10;
+    public $tries = 1;
+    public $timeout = 3 * 60;
 
     private $ids;
     private $conn;
@@ -43,14 +44,15 @@ class CorporationCheck implements ShouldQueue
      */
     public function handle()
     {
-        // batch those ids into a single request
+        // batch ids into a single request
         $affiliations = $this->conn->setBody($this->ids)->invoke('post', '/characters/affiliation/');
 
         $uniq_corporations = $this->reduceCorporations($affiliations->getArrayCopy());
 
         // make all corporation requests at once to save unneeded re-fetching
-        $corporations = [];
-
+        $start = microtime(true);
+        Log::info('CorporationCheck: fetching corp data', ['count' => count($uniq_corporations)]);
+        $corporations = array();
         foreach ($uniq_corporations as $corp) {
             $corporations[$corp->corporation_id] = $this->conn->invoke(
                 'get',
@@ -61,6 +63,11 @@ class CorporationCheck implements ShouldQueue
             );
         }
 
+        // The above loop is currently the long pole for this job, frequently taking 40+ seconds.
+        // Unfortunately, we still need to query all the corps in case their alliance changes.
+        Log::info('CorporationCheck: done fetching corp data', ['t' => microtime(true)-$start]);
+
+        $changed_miners = 0;
         foreach ($affiliations as $affiliation) {
             $id = $affiliation->character_id;
             $corporation_id = $affiliation->corporation_id;
@@ -73,86 +80,85 @@ class CorporationCheck implements ShouldQueue
             // if they are changed later we save to db
             $changed = false;
 
-            Log::info('CorporationCheck: checking miner ' . $id);
+            $ctx = [
+                'name' => $miner->name,
+                'char_id' => $id,
+            ];
 
             // most characters live in doomheim when they are deleted
             if ($affiliation->corporation_id === 1000001) {
-                Log::info("" . $id . " is in Doomheim, bailing.");
-
+                Log::info('CorporationCheck: miner is in Doomheim', $ctx);
                 continue; // bail
             }
 
-            // Check if they are still in the same corporation as last time we checked.
-            if ($miner->corporation_id == $corporation_id) {
-                Log::info(
-                    'CorporationCheck: miner ' . $id . ' is still in the same corporation ' .
-                    $corporation_id
-                );
-            } else {
-                // Update the miner's stored corporation ID.
-                $miner->corporation_id = $corporation_id;
+            // Insert new corporation if we don't know about it.
+            $existing_corporation = Corporation::where('corporation_id', $corporation_id)->first();
+            if (!isset($existing_corporation)) {
+                $new_corporation = new Corporation;
+                $new_corporation->corporation_id = $corporation_id;
+                $new_corporation->name = $corporation->name;
+                $new_corporation->save();
 
-                Log::info(
-                    'CorporationCheck: miner ' . $id . ' has moved to corporation ' .
-                    $corporation_id
-                );
+                Log::info('CorporationCheck: stored new corporation', [
+                    'corp_name' => $new_corporation->name,
+                    'corp_id' => $new_corporation->corporation_id,
+                    'alliance_id' => $corporation->alliance_id,
+                ]);
+            }
 
-                // TODO: this can be moved up
-                // Check if they have moved to another corporation we know about already.
-                $existing_corporation = Corporation::where('corporation_id', $corporation_id)->first();
+            // Insert new alliance if we don't know about it.
+            if (isset($corporation->alliance_id)) {
+                $existing_alliance = Alliance::where('alliance_id', $corporation->alliance_id)->first();
+                if (!isset($existing_alliance)) {
+                    $alliance = $this->conn->invoke('get', '/alliances/{alliance_id}/', [
+                        'alliance_id' => $corporation->alliance_id,
+                    ]);
 
-                if (!isset($existing_corporation)) {
-                    $new_corporation = new Corporation;
-                    $new_corporation->corporation_id = $corporation_id;
-                    $new_corporation->name = $corporation->name;
-                    $new_corporation->save();
+                    // This is a new alliance, save the details.
+                    $new_alliance = new Alliance;
+                    $new_alliance->alliance_id = $corporation->alliance_id;
+                    $new_alliance->name = $alliance->name;
+                    $new_alliance->save();
 
-                    Log::info('CorporationCheck: stored new corporation ' . $corporation->name);
-
-                    // Check if their new corporation is a different alliance.
-                    if (isset($corporation->alliance_id)) {
-                        $miner->alliance_id = $corporation->alliance_id;
-
-                        // TODO: this can be moved up
-                        $existing_alliance = Alliance::where('alliance_id', $corporation->alliance_id)->first();
-
-                        if (!isset($existing_alliance)) {
-                            // TODO: this can be batched to avoid re-fetching previously fetched data
-                            $alliance = $this->conn->invoke('get', '/alliances/{alliance_id}/', [
-                                'alliance_id' => $corporation->alliance_id,
-                            ]);
-
-                            // This is a new alliance, save the details.
-                            $new_alliance = new Alliance;
-                            $new_alliance->alliance_id = $corporation->alliance_id;
-                            $new_alliance->name = $alliance->name;
-                            $new_alliance->save();
-
-                            Log::info('CorporationCheck: stored new alliance ' . $alliance->name);
-                        }
-                    }
-
+                    Log::info('CorporationCheck: stored new alliance', [
+                        'alliance_name' => $new_alliance->name,
+                        'alliance_id' => $new_alliance->alliance_id,
+                    ]);
                 }
-
-                $changed = true;
             }
 
-            if (isset($corporation->alliance_id) && $miner->alliance_id != $corporation->alliance_id) {
+            $ctx['corp_id'] = $miner->corporation_id;
+            $ctx['alliance_id'] = $miner->alliance_id;
+
+            // Check if they are still in the same corporation as last time we checked.
+            if ($miner->corporation_id != $corporation_id) {
+                $changed = true;
+                $miner->corporation_id = $corporation_id;
+                $ctx['new_corp_id'] = $corporation_id;
+            }
+
+            if (!isset($corporation->alliance_id)) {
+                if (isset($miner->alliance_id)) {
+                    $changed = true;
+                    $miner->alliance_id = null;
+                    $ctx['new_alliance_id'] = null;
+                }
+            } else if ($miner->alliance_id != $corporation->alliance_id) {
+                $changed = true;
                 $miner->alliance_id = $corporation->alliance_id;
-
-                $changed = true;
-
-                Log::info(
-                    'CorporationCheck: updated alliance ' . $corporation->alliance_id .
-                    ' for miner ' . $id
-                );
+                $ctx['new_alliance_id'] = $corporation->alliance_id;
             }
 
-            if ($changed) {
-                // Save the updated miner record.
+            if (!$changed) {
+                Log::info('CorporationCheck: miner unchanged', $ctx);
+            } else {
                 $miner->save();
+                $changed_miners++;
+                Log::info('CorporationCheck: miner changed', $ctx);
             }
         }
+
+        Log::info('CorporationCheck: batch complete', ['changed_miners' => $changed_miners]);
     }
 
     private function reduceCorporations(array $objects): array
