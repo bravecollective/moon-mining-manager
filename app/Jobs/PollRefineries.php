@@ -56,10 +56,7 @@ class PollRefineries implements ShouldQueue
             'WHERE natural_decay_time < NOW() - INTERVAL 1 DAY ' .
                 'AND (claimed_by_primary IS NOT NULL OR claimed_by_secondary IS NOT NULL)'
         );
-        Log::info(
-            'PollRefineries: cleared ' . $previous_detonations .
-            ' claimed refinery detonations from the previous 24 hours'
-        );
+        Log::info('PollRefineries: cleared claimed refinery detonations in the last day', ['count' => $previous_detonations]);
 
         // Request a list of all of the active mining observers belonging to the corporation.
         $corporation_id = $esi->getCorporationId($this->user_id);
@@ -71,10 +68,7 @@ class PollRefineries implements ShouldQueue
 
         // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
         if ($this->page == 1 && $mining_observers->pages > 1) {
-            Log::info(
-                'PollRefineries: found more than 1 page of refineries, queuing additional jobs for ' .
-                $mining_observers->pages . ' total pages'
-            );
+            Log::info('PollRefineries: found more than 1 page of refineries, queuing additional jobs', ['pages'=>$mining_observers->pages]);
             $delayCounter = 1;
             for ($i = 2; $i <= $mining_observers->pages; $i++) {
                 PollRefineries::dispatch($this->user_id, $i)->delay(Carbon::now()->addMinutes($delayCounter));
@@ -82,7 +76,7 @@ class PollRefineries implements ShouldQueue
             }
         }
 
-        Log::info('PollRefineries: found ' . count($mining_observers) . ' refineries with active asteroid fields');
+        Log::info('PollRefineries: found refineries with active asteroid fields', ['count' => count($mining_observers)]);
 
         // Process the refineries list. For each entry, we want to check and see if it already exists
         // in the database. If it doesn't, we create a new database entry for it.
@@ -95,7 +89,7 @@ class PollRefineries implements ShouldQueue
                 $refinery->observer_type = $observer->observer_type;
                 $refinery->corporation_id = $corporation_id;
                 $refinery->save();
-                Log::info('PollRefineries: created new refinery record for ' . $observer->observer_id);
+                Log::info('PollRefineries: created new refinery record', ['observer_id' => $observer->observer_id]);
                 // Create a new job to fill in the parts we don't know from this response.
                 PollStructureData::dispatch($observer->observer_id, $this->user_id);
             }

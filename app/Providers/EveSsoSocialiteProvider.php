@@ -21,7 +21,7 @@ class EveSsoSocialiteProvider extends AbstractProvider implements ProviderInterf
 
     protected function getTokenUrl(): string
     {
-        $ssoHost = env('EVEONLINE_SSO_HOST', 'login.eveonline.com');
+        $ssoHost = config('services.eve-sso.sso_host');
         return "https://$ssoHost/v2/oauth/token";
     }
 

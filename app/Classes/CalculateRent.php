@@ -117,7 +117,7 @@ class CalculateRent
             $tax_rate->updated_by = 0;
             $tax_rate->save();
 
-            Log::info('CalculateRent: unknown ore ' . $type->typeID . ' found, new tax rate record created');
+            Log::info('CalculateRent: unknown ore found, new tax rate record created', ['type_id' => $type->typeID, 'rate' => 7]);
 
             // Queue the jobs to update the ore values rather than waiting for the next scheduled job.
             UpdateReprocessedMaterials::dispatch();

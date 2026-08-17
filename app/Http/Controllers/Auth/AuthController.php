@@ -58,7 +58,7 @@ class AuthController extends Controller
         // Find or create the user.
         $user = Socialite::driver($this->socialite_driver)->user();
         $authUser = $this->findOrCreateUser($user);
-        Log::info('AuthController: login attempt by ' . $authUser->name);
+        Log::info('AuthController: login attempt', ['name' => $authUser->name, 'char_id' => $authUser->eve_id]);
 
         $esi = new EsiConnection;
         $conn = $esi->getConnection();
@@ -80,8 +80,8 @@ class AuthController extends Controller
         ]);
 
         // If an alliance is set, it must match the stored environment variable.
-        $allowedAlliances = explode(',', env('EVE_ALLIANCES_LOGIN'));
-        $allowedCorporations = explode(',', env('EVE_CORPORATIONS_LOGIN'));
+        $allowedAlliances = explode(',', config('eve.alliances_login'));
+        $allowedCorporations = explode(',', config('eve.corporations_login'));
         if (($character->corporation_id > 0 && in_array($character->corporation_id, $allowedCorporations))
             ||
             (
@@ -90,16 +90,21 @@ class AuthController extends Controller
             )
         ) {
             Auth::login($authUser, true);
-            Log::info('AuthController: successful login by ' . $authUser->name);
+            Log::info('AuthController: login successful', ['name' => $authUser->name, 'char_id' => $authUser->eve_id]);
         } else {
-            Log::info('AuthController: unsuccessful login by ' . $authUser->name . ', alliance/corp match failed');
+            Log::info('AuthController: login failed', [
+                'name' => $authUser->name,
+                'char_id' => $authUser->eve_id,
+                'corp_id' => $character->corporation_id,
+                'reason' => 'alliance/corp match failed',
+            ]);
             return redirect()->route('login');
         }
 
         // Check if the user is whitelisted to access the administrator area.
         $whitelist = Whitelist::where('eve_id', $authUser->eve_id)->first();
         if (isset($whitelist)) {
-            Log::info('AuthController: successful administrator login by ' . $authUser->name);
+            Log::info('AuthController: successful administrator login', ['name' => $authUser->name, 'char_id' => $authUser->eve_id]);
             return redirect('/');
         } else {
             return redirect('/timers');

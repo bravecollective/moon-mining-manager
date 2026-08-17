@@ -36,11 +36,11 @@ class Payment extends Model
      */
     public function miner()
     {
-        return $this->belongsTo('App\Models\Miner', 'miner_id', 'eve_id');
+        return $this->belongsTo(Miner::class, 'miner_id', 'eve_id');
     }
 
     public function createdBy()
     {
-        return $this->belongsTo('App\Models\User', 'created_by', 'eve_id');
+        return $this->belongsTo(User::class, 'created_by', 'eve_id');
     }
 }

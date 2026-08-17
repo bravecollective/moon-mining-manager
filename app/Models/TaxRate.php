@@ -40,7 +40,7 @@ class TaxRate extends Model
      */
     public function type()
     {
-        return $this->belongsTo('App\Models\Type', 'type_id');
+        return $this->belongsTo(Type::class, 'type_id');
     }
 
     /**
@@ -48,7 +48,7 @@ class TaxRate extends Model
      */
     public function reprocessed_materials()
     {
-        return $this->hasMany('App\Models\TypeMaterial', 'typeID', 'type_id');
+        return $this->hasMany(TypeMaterial::class, 'typeID', 'type_id');
     }
 
 }

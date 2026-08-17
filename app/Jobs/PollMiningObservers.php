@@ -38,7 +38,7 @@ class PollMiningObservers implements ShouldQueue
         $refineries = Refinery::where('corporation_id', $this->corporationId)->where('available', 1)->get();
         $delay_counter = 0;
 
-        Log::info('PollMiningObservers: creating jobs to poll ' . count($refineries) . ' refineries');
+        Log::info('PollMiningObservers: creating jobs to poll refineries', ['count' => count($refineries)]);
 
         // For each refinery create a new job in the queue to poll the API.
         foreach ($refineries as $refinery) {

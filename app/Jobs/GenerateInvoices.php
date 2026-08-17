@@ -27,11 +27,11 @@ class GenerateInvoices implements ShouldQueue
 
         // Build the WHERE clause to filter by alliance and/or corporation membership.
         $whitelist_where = [];
-        if (env('EVE_ALLIANCES_WHITELIST')) {
-            $whitelist_where[] = 'alliance_id IN (' . env('EVE_ALLIANCES_WHITELIST') . ')';
+        if (config('eve.alliances_whitelist')) {
+            $whitelist_where[] = 'alliance_id IN (' . config('eve.alliances_whitelist') . ')';
         }
-        if (env('EVE_CORPORATIONS_WHITELIST')) {
-            $whitelist_where[] = 'corporation_id IN (' . env('EVE_CORPORATIONS_WHITELIST') . ')';
+        if (config('eve.corporations_whitelist')) {
+            $whitelist_where[] = 'corporation_id IN (' . config('eve.corporations_whitelist') . ')';
         }
         if (count($whitelist_where)) {
             $whitelist_whereRaw = '(' . implode(' OR ', $whitelist_where) . ')';
@@ -39,23 +39,28 @@ class GenerateInvoices implements ShouldQueue
 
         // For all miners in your whitelisted alliances/corporations that currently
         // owe an outstanding balance, queue a job to generate and send an invoice.
-        $debtors = Miner::where('amount_owed', '>=', 1000)->whereRaw($whitelist_whereRaw)->get();
-        Log::info(
-            'GenerateInvoices: found ' . count($debtors) .
-            ' miners with an outstanding balance over 1,000 ISK to be invoiced'
-        );
-        $delay_counter = 1;
+        $threshold = 1000;
+        $debtors = Miner::where('amount_owed', '>=', $threshold)
+            ->whereRaw($whitelist_whereRaw)
+            ->where('miners.updated_at', '>=', Carbon::now()->subYear())
+            ->orderByDesc('miners.updated_at')
+            ->orderBy('miners.eve_id')
+            ->get();
 
+        Log::info('GenerateInvoices: miners with balance over threshold', [
+            'threshold' => $threshold,
+            'count' => count($debtors),
+        ]);
+
+        $delay_counter = 1;
         foreach ($debtors as $miner) {
             GenerateInvoice::dispatch($miner->eve_id, $delay_counter)
                 ->delay(Carbon::now()->addSeconds($delay_counter * 10));
-            Log::info(
-                'GenerateInvoices: dispatched job to generate invoice for miner ' . $miner->eve_id .
-                ' and send mail ' . $delay_counter . ' minutes later'
-            );
+            Log::debug('GenerateInvoices: dispatched job to generate invoice for miner', [
+                'char_id' => $miner->eve_id,
+                'delay_secs' => $delay_counter * 10,
+            ]);
             $delay_counter++;
         }
-
     }
-
 }

@@ -41,7 +41,7 @@ class MiningActivity extends Model
 
     // Allow for using insertIgnore calls on this model.
     //use ReplaceableModel;
-    
+
     protected $table = 'mining_activities';
 
     /**
@@ -49,7 +49,7 @@ class MiningActivity extends Model
      */
     public function miner()
     {
-        return $this->belongsTo('App\Models\Miner');
+        return $this->belongsTo(Miner::class);
     }
 
     /**
@@ -57,7 +57,7 @@ class MiningActivity extends Model
      */
     public function refinery()
     {
-        return $this->belongsTo('App\Models\Refinery', 'refinery_id', 'observer_id');
+        return $this->belongsTo(Refinery::class, 'refinery_id', 'observer_id');
     }
 
     /**
@@ -65,7 +65,7 @@ class MiningActivity extends Model
      */
     public function type()
     {
-        return $this->belongsTo('App\Models\Type', 'type_id', 'typeID');
+        return $this->belongsTo(Type::class, 'type_id', 'typeID');
     }
 
 }

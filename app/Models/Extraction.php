@@ -48,31 +48,31 @@ class Extraction extends Model
 
     public function invMoon()
     {
-        return $this->belongsTo('App\Models\UniqueNames', 'moon_id');
+        return $this->belongsTo(UniqueNames::class, 'moon_id');
     }
 
     public function refinery()
     {
-        return $this->belongsTo('App\Models\Refinery', 'refinery_id', 'observer_id');
+        return $this->belongsTo(Refinery::class, 'refinery_id', 'observer_id');
     }
 
     public function ore1()
     {
-        return $this->belongsTo('App\Models\Type', 'ore1_type_id');
+        return $this->belongsTo(Type::class, 'ore1_type_id');
     }
 
     public function ore2()
     {
-        return $this->belongsTo('App\Models\Type', 'ore2_type_id');
+        return $this->belongsTo(Type::class, 'ore2_type_id');
     }
 
     public function ore3()
     {
-        return $this->belongsTo('App\Models\Type', 'ore3_type_id');
+        return $this->belongsTo(Type::class, 'ore3_type_id');
     }
 
     public function ore4()
     {
-        return $this->belongsTo('App\Models\Type', 'ore4_type_id');
+        return $this->belongsTo(Type::class, 'ore4_type_id');
     }
 }

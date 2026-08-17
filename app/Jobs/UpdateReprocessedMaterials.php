@@ -26,7 +26,7 @@ class UpdateReprocessedMaterials implements ShouldQueue
     {
         // Find any tax rates (i.e. ore types) that need to have their reprocessed materials checked.
         $tax_rates = TaxRate::where('check_materials', 1)->get();
-        Log::info('UpdateReprocessedMaterials: found ' . count($tax_rates) . ' rates needing materials');
+        Log::info('UpdateReprocessedMaterials: found tax rates needing materials', ['count' => count($tax_rates)]);
         foreach ($tax_rates as $rate) {
             // Pull the reprocessed material components for this item and store them in the
             // table if they don't already exist.
@@ -38,7 +38,7 @@ class UpdateReprocessedMaterials implements ShouldQueue
                     $x->materialTypeID = $material->materialTypeID;
                     $x->average_price = 0;
                     $x->save();
-                    Log::info('UpdateReprocessedMaterials: created new entry for material ' . $x->materialTypeID);
+                    Log::info('UpdateReprocessedMaterials: created new entry for material', ['material_id' => $x->materialTypeID]);
                 }
             }
             // Update the flag to show the materials have been checked and save the tax rate record.

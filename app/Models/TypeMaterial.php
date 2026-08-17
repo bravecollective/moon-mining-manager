@@ -27,7 +27,7 @@ class TypeMaterial extends Model
 
     public function type()
     {
-        return $this->belongsTo('App\Models\Type', 'typeID', 'typeID');
+        return $this->belongsTo(Type::class, 'typeID', 'typeID');
     }
 
 }

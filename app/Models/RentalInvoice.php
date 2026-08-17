@@ -35,11 +35,11 @@ class RentalInvoice extends Model
      */
     public function refinery()
     {
-        return $this->hasOne('App\Models\Refinery', 'observer_id', 'refinery_id');
+        return $this->hasOne(Refinery::class, 'observer_id', 'refinery_id');
     }
 
     public function moon()
     {
-        return $this->hasOne('App\Models\Moon', 'id', 'moon_id');
+        return $this->hasOne(Moon::class, 'id', 'moon_id');
     }
 }

@@ -77,7 +77,7 @@ class PollWallet implements ShouldQueue
         $this->conn = $esi->getConnection($this->userId);
         $corporationId = $esi->getCorporationId($this->userId);
 
-        Log::info('PollWallet: Retrieving transactions, corporation ' . $corporationId . ', page ' . $this->page);
+        Log::info('PollWallet: Retrieving transactions', ['corp_id' => $corporationId, 'page' => $this->page]);
 
         // Request the transactions from the master wallet division.
         $transactions = $this->conn->setQueryString([
@@ -87,7 +87,7 @@ class PollWallet implements ShouldQueue
             'division' => 1, // master wallet
         ]);
 
-        Log::info('PollWallet: retrieved ' . count($transactions) . ' transactions from the corporation wallet');
+        Log::info('PollWallet: retrieved transactions from the corporation wallet', ['corp_id' => $corporationId, 'count' => count($transactions)]);
 
         $this->delay_counter = 1;
         $date = NULL;
@@ -121,7 +121,7 @@ class PollWallet implements ShouldQueue
             $miner = Miner::where('eve_id', $transaction->first_party_id)->first(); /* @var Miner $miner */
 
             $payment_pool = $transaction->amount;
-            if ($this->userId == env('RENT_CORPORATION_PRIME_USER_ID') && isset($contracts)) {
+            if ($this->userId == config('eve.rent_corporation_prime_user_id') && isset($contracts)) {
                 foreach ($contracts as $contract) {
                     $amount_paid = min($contract->amount_owed, $payment_pool);
                     if ($amount_paid <= 0.0) {
@@ -133,20 +133,20 @@ class PollWallet implements ShouldQueue
             }
 
             // Next, if this donation is actually from a recognised miner (and wasn't already processed).
-            if ($payment_pool > 0.0 && $this->userId == env('TAX_CORPORATION_PRIME_USER_ID') && isset($miner)) {
+            if ($payment_pool > 0.0 && $this->userId == config('eve.tax_corporation_prime_user_id') && isset($miner)) {
                 $this->processTaxes($transaction, $payment_pool, $miner, $date, $ref_id);
             }
             if ($payment_pool > 0.0) {
-                Log::warning('transaction amount not entirely applied ' . json_encode($transaction));
+                Log::warning('PollWallet: transaction amount not entirely applied' . json_encode($transaction));
             }
         }
 
         // poll next page?
         if ($pollNextPage && $date !== null && $date >= '2019-01-01') {
-            Log::info(
-                'PollWallet: queued job to poll page ' . ($this->page + 1) .
-                ' in ' . $this->delay_counter . ' minutes'
-            );
+            Log::info('PollWallet: queued job to poll page', [
+                'page' => ($this->page + 1),
+                'delay_mins' => $this->delay_counter,
+            ]);
             PollWallet::dispatch($this->userId, $this->page + 1, $this->date)
                 ->delay(Carbon::now()->addMinutes($this->delay_counter));
         }
@@ -154,10 +154,10 @@ class PollWallet implements ShouldQueue
         // If the last transaction date is not earlier than a specified date, request the next page of wallet results,
         // but never go back further than 2019-01-01.
         elseif ($this->date !== '' && $date !== null && $date >= $this->date && $date >= '2019-01-01') {
-            Log::info(
-                'PollWallet: Date ' . $date . ' is greater than ' . $this->date .
-                ', repolling for any earlier transactions'
-            );
+            Log::info('PollWallet: Transaction date is greater than job date, repolling for any earlier transactions', [
+                'transaction_date' => $date,
+                'job_date' => $this->date,
+            ]);
             PollWallet::dispatch($this->userId, $this->page + 1, $this->date)
                 ->delay(Carbon::now()->addMinutes($this->delay_counter));
         }
@@ -183,11 +183,12 @@ class PollWallet implements ShouldQueue
         // Clear their outstanding debt.
         $renter->amount_owed -= $amount_paid;
         $renter->save();
-        Log::info(
-            'PollWallet: saved a new payment from renter ' . $renter->character_id .
-            ' at refinery ' . $renter->refinery_id . '/moon ' . $renter->moon_id .
-            ' for ' . $amount_paid
-        );
+        Log::info('PollWallet: saved a new payment from renter', [
+            'char_id' => $renter->character_id,
+            'amount' => $amount_paid,
+            'refinery_id' => $renter->refinery_id,
+            'moon' => $renter->moon_id,
+        ]);
 
         // Retrieve the name of the character.
         $character = $this->conn->invoke('get', '/characters/{character_id}/', [
@@ -205,8 +206,12 @@ class PollWallet implements ShouldQueue
      */
     private function processTaxes($transaction, $payment_pool, Miner $miner, $date, $ref_id)
     {
-        Log::info('PollWallet: found a player donation of ' . $payment_pool .
-            ' ISK from a recognised miner ' . $miner->eve_id . ' on ' . $date . ', reference ' . $ref_id);
+        Log::info('PollWallet: player donation', [
+            'payment_pool' => $payment_pool,
+            'char_id' => $miner->eve_id,
+            'date' => $date,
+            'ref_id' => $ref_id,
+        ]);
 
         // Parse the 'reason' entered by the player to see if they want to pay off other players/alts bills.
         if (isset($transaction->reason)) {
@@ -229,17 +234,12 @@ class PollWallet implements ShouldQueue
                     $recipients[] = $recipient_miner;
                 }
             }
-            Log::info(
-                'PollWallet: detected player-entered reason for payment, ' .
-                    'parsed for alternative recipients of payment, found ' .
-                    count($recipients) . ' additional valid recipients.',
-                [
-                    'recipients' => array_map(function ($recipient) {
-                        return ['eve_id' => $recipient['eve_id'], 'name' => $recipient['name']];
-                    }, $recipients),
-                    'reason' => $reason
-                ]
-            );
+            Log::info('PollWallet: detected player-entered reason for payment, found valid additional recipients.', [
+                'recipients' => array_map(function ($recipient) {
+                    return ['eve_id' => $recipient['eve_id'], 'name' => $recipient['name']];
+                }, $recipients),
+                'reason' => $reason,
+            ]);
 
             // If any valid recipients were found, create payments to them.
             foreach ($recipients as $recipient) {
@@ -256,8 +256,11 @@ class PollWallet implements ShouldQueue
                 $payment->ref_id = $ref_id;
                 $payment->amount_received = $payment_amount;
                 $payment->save();
-                Log::info('PollWallet: saved a new payment from miner ' . $miner->eve_id .
-                    ' on behalf of miner ' . $recipient->eve_id . ' for ' . $payment_amount);
+                Log::info('PollWallet: saved a new payment', [
+                    'amount' => $payment_amount,
+                    'payer' => $miner->eve_id,
+                    'credited_to' => $recipient->eve_id,
+                ]);
 
                 // Deduct the amount from the recipient's outstanding balance.
                 if ($recipient->id == $miner->id) {
@@ -279,7 +282,11 @@ class PollWallet implements ShouldQueue
             $payment->amount_received = $payment_pool;
             $payment->save();
 
-            Log::info('PollWallet: saved a new payment from miner ' . $miner->eve_id . ' for ' . $payment_pool);
+            Log::info('PollWallet: saved a new payment', [
+                'amount' => $payment_pool,
+                'payer' => $miner->eve_id,
+                'credited_to' => $miner->eve_id,
+            ]);
 
             // Deduct the amount from their outstanding balance.
             $miner->amount_owed -= $payment_pool;
@@ -324,6 +331,10 @@ class PollWallet implements ShouldQueue
         // Queue sending the eve mail, spaced at 1 minute intervals to avoid triggering the mail spam limiter (4/min).
         SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($this->delay_counter));
         $this->delay_counter++;
-        Log::info("PollWallet: queued job to send $type receipt eve mail in " . $this->delay_counter . ' minutes');
+        Log::info('PollWallet: queued job to send payment receipt eve mail', [
+            'type' => $type,
+            'recipients' => $mail['recipients'],
+            'delay_mins' => $this->delay_counter,
+        ]);
     }
 }

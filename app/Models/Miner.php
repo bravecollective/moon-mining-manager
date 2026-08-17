@@ -45,13 +45,13 @@ use Illuminate\Support\Facades\DB;
  */
 class Miner extends Model
 {
-    
+
     /**
      * Get the invoices for the miner.
      */
     public function invoices()
     {
-        return $this->hasMany('App\Models\Invoice');
+        return $this->hasMany(Invoice::class);
     }
 
     /**
@@ -59,7 +59,7 @@ class Miner extends Model
      */
     public function payments()
     {
-        return $this->hasMany('App\Models\Payment');
+        return $this->hasMany(Payment::class);
     }
 
     /**
@@ -67,7 +67,7 @@ class Miner extends Model
      */
     public function mining_activity()
     {
-        return $this->hasMany('App\Models\MiningActivity');
+        return $this->hasMany(MiningActivity::class);
     }
 
     /**
@@ -75,7 +75,7 @@ class Miner extends Model
      */
     public function alliance()
     {
-        return $this->belongsTo('App\Models\Alliance', 'alliance_id', 'alliance_id')->withDefault([
+        return $this->belongsTo(Alliance::class, 'alliance_id', 'alliance_id')->withDefault([
             'name' => 'no alliance',
         ]);
     }
@@ -85,7 +85,7 @@ class Miner extends Model
      */
     public function corporation()
     {
-        return $this->belongsTo('App\Models\Corporation', 'corporation_id', 'corporation_id');
+        return $this->belongsTo(Corporation::class, 'corporation_id', 'corporation_id');
     }
 
     /**

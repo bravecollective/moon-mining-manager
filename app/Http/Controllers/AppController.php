@@ -32,13 +32,13 @@ class AppController extends Controller
         $whitelist_where = [];
         $blacklist_where = [];
 
-        if (env('EVE_ALLIANCES_WHITELIST')) {
-            $whitelist_where[] = 'alliance_id IN (' . env('EVE_ALLIANCES_WHITELIST') . ')';
-            $blacklist_where[] = '(alliance_id NOT IN (' . env('EVE_ALLIANCES_WHITELIST') . ') OR alliance_id IS NULL)';
+        if (config('eve.alliances_whitelist')) {
+            $whitelist_where[] = 'alliance_id IN (' . config('eve.alliances_whitelist') . ')';
+            $blacklist_where[] = '(alliance_id NOT IN (' . config('eve.alliances_whitelist') . ') OR alliance_id IS NULL)';
         }
-        if (env('EVE_CORPORATIONS_WHITELIST')) {
-            $whitelist_where[] = 'corporation_id IN (' . env('EVE_CORPORATIONS_WHITELIST') . ')';
-            $blacklist_where[] = 'corporation_id NOT IN (' . env('EVE_CORPORATIONS_WHITELIST') . ')';
+        if (config('eve.corporations_whitelist')) {
+            $whitelist_where[] = 'corporation_id IN (' . config('eve.corporations_whitelist') . ')';
+            $blacklist_where[] = 'corporation_id NOT IN (' . config('eve.corporations_whitelist') . ')';
         }
 
         $whitelist_whereRaw = null;
@@ -85,7 +85,8 @@ class AppController extends Controller
             'top_miner' => (isset($top_miner)) ? $top_miner : null,
             'top_refinery' => (isset($top_refinery)) ? $top_refinery : null,
             'top_system' => (isset($top_system)) ? $top_system : null,
-            'miners' => Miner::where('amount_owed', '>=', 1)->whereRaw($whitelist_whereRaw)
+            'miners' => Miner::where('amount_owed', '>=', 1)
+                ->when($whitelist_whereRaw, fn($q) => $q->whereRaw($whitelist_whereRaw))
                 ->orderBy('amount_owed', 'desc')->get(),
             'ninjas' => $blacklist_whereRaw ? Miner::whereRaw($blacklist_whereRaw)->limit(100)->get() : [],
             'total_amount_owed' => $total_amount_owed ? $total_amount_owed->total : 0,

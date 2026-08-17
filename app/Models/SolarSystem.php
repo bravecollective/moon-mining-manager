@@ -71,7 +71,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class SolarSystem extends Model
 {
-    
+
     protected $table = 'mapSolarSystems';
     protected $primaryKey = 'solarSystemID';
     public $incrementing = false;
@@ -82,7 +82,7 @@ class SolarSystem extends Model
      */
     public function refinery()
     {
-        return $this->hasMany('App\Models\Refinery');
+        return $this->hasMany(Refinery::class);
     }
 
     /**
@@ -90,7 +90,7 @@ class SolarSystem extends Model
      */
     public function region()
     {
-        return $this->belongsTo('App\Models\Region', 'regionID');
+        return $this->belongsTo(Region::class, 'regionID');
     }
 
     /**
@@ -98,7 +98,7 @@ class SolarSystem extends Model
      */
     public function moons()
     {
-        return $this->hasMany('App\Models\Moon');
+        return $this->hasMany(Moon::class);
     }
 
 }

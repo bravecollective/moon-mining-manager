@@ -37,10 +37,10 @@ class GenerateRentReminders implements ShouldQueue
             // Queue jobs to create and send the individual mails.
             GenerateRentReminder::dispatch($renter->id, $delay_counter)
                 ->delay(Carbon::now()->addSeconds($delay_counter * 10));
-            Log::info(
-                'GenerateRentReminders: dispatched job to generate mail for renter ' .
-                $renter->character_id . ' and send mail in ' . $delay_counter . ' minutes'
-            );
+            Log::info('GenerateRentReminders: dispatched job to generate mail for renter', [
+                'char_id' => $renter->character_id,
+                'delay_mins' => $delay_counter,
+            ]);
             $delay_counter++;
         }
     }

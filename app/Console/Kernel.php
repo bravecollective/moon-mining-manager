@@ -30,7 +30,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        'App\Console\Commands\RunJob'
+        'App\Console\Commands\RunJob',
+        'App\Console\Commands\ImportEveStaticData',
     ];
 
     /**
@@ -41,10 +42,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $rentUserId = (int)env('RENT_CORPORATION_PRIME_USER_ID', 0);
-        $taxUserId = (int)env('TAX_CORPORATION_PRIME_USER_ID', 0);
-        $rentCorporationId = (int)env('RENT_CORPORATION_ID', 0);
-        $taxCorporationId = (int)env('TAX_CORPORATION_ID', 0);
+        $rentUserId = (int)config('eve.rent_corporation_prime_user_id');
+        $taxUserId = (int)config('eve.tax_corporation_prime_user_id');
+        $rentCorporationId = (int)config('eve.rent_corporation_id');
+        $taxCorporationId = (int)config('eve.tax_corporation_id');
 
         if ($rentUserId) {
             // Poll all corporation structures to look for refineries.
@@ -111,7 +112,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new GenerateRentReminders)->monthlyOn(26, '09:00');
 
         // Send monthly summary of delinquent renters to the site admin.
-        if ((int)env('ADMIN_USER_ID', 0) > 0) {
+        if ((int)config('eve.admin_user_id') > 0) {
             $schedule->job(new SendRenterDelinquencyList)->monthlyOn(29, '09:00');
         }
     }

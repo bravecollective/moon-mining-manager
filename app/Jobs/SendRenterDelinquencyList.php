@@ -46,12 +46,12 @@ class SendRenterDelinquencyList implements ShouldQueue
             // Grab a reference to the refinery/moon that is being rented.
             $nameRented = $renter->getRentedName();
             if ($nameRented === null) {
-                Log::info("SendRenterDelinquencyList: Renter $renter->id without moon, aborting.");
+                Log::info('SendRenterDelinquencyList: Renter without moon, aborting.', ['char_id' => $renter->id]);
                 return;
             }
 
             // Output the details of this renter to the email body.
-            $url = env('APP_URL', '');
+            $url = config('app.url');
             $body .= "Renter: <url=showinfo:1376//$renter->character_id>$character->name</url>\n";
             $body .= "Refinery: <loc><url=$url$renter->refinery_id>$nameRented</url></loc>\n";
             $body .= 'Balance: ' . number_format($renter->amount_owed) . "ISK\n\n";
@@ -60,7 +60,7 @@ class SendRenterDelinquencyList implements ShouldQueue
             'body' => $body,
             'recipients' => array(
                 array(
-                    'recipient_id' => env('ADMIN_USER_ID', 0),
+                    'recipient_id' => config('eve.admin_user_id'),
                     'recipient_type' => 'character'
                 )
             ),
@@ -71,7 +71,7 @@ class SendRenterDelinquencyList implements ShouldQueue
         // Queue sending the evemail, spaced at 1 minute intervals to avoid triggering the mailspam limiter (4/min).
         SendEvemail::dispatch($mail);
         Log::info('SendRenterDelinquencyList: dispatched job to send mail', [
-            'mail' => $mail,
+            'recipient' => $mail['recipient'],
         ]);
     }
 }

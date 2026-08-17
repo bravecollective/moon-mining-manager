@@ -7,6 +7,20 @@
     <div class="row">
 
         <div class="col-12">
+            <form method="get" action="/miners" class="external-filters">
+                <label for="miner-search">Search miners</label>
+                <input
+                    type="search"
+                    id="miner-search"
+                    name="search"
+                    value="{{ $search }}"
+                    placeholder="Name or character ID"
+                >
+                <button type="submit">Search</button>
+                @if ($search !== '')
+                    <a href="/miners">Clear</a>
+                @endif
+            </form>
             <table id="miners">
                 <thead>
                     <th>Miner</th>
@@ -18,7 +32,7 @@
                     <th>Last payment date</th>
                 </thead>
                 <tbody>
-                    @foreach ($miners as $miner)
+                    @forelse ($miners as $miner)
                         <tr>
                             <td><a href="/miners/{{ $miner->eve_id }}">{{ $miner->name }}</a></td>
                             <td>
@@ -42,7 +56,11 @@
                                 @endif
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7">No miners match your search.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
             {{ $miners->links() }}

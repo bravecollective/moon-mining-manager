@@ -26,11 +26,11 @@ class RegenerateInvoices implements ShouldQueue
 
         // Build the WHERE clause to filter by alliance and/or corporation membership.
         $whitelist_where = [];
-        if (env('EVE_ALLIANCES_WHITELIST')) {
-            $whitelist_where[] = 'alliance_id IN (' . env('EVE_ALLIANCES_WHITELIST') . ')';
+        if (config('eve.alliances_whitelist')) {
+            $whitelist_where[] = 'alliance_id IN (' . config('eve.alliances_whitelist') . ')';
         }
-        if (env('EVE_CORPORATIONS_WHITELIST')) {
-            $whitelist_where[] = 'corporation_id IN (' . env('EVE_CORPORATIONS_WHITELIST') . ')';
+        if (config('eve.corporations_whitelist')) {
+            $whitelist_where[] = 'corporation_id IN (' . config('eve.corporations_whitelist') . ')';
         }
         if (count($whitelist_where)) {
             $whitelist_whereRaw = '(' . implode(' OR ', $whitelist_where) . ')';
@@ -42,20 +42,16 @@ class RegenerateInvoices implements ShouldQueue
         $debtors = Miner::select('eve_id')->where('amount_owed', '>=', 1)->whereRaw($whitelist_whereRaw)
             ->whereRaw('eve_id NOT IN (SELECT miner_id FROM invoices WHERE DATE(created_at) = "' . $last_monday . '")')
             ->get();
-        Log::info(
-            'RegenerateInvoices: found ' . count($debtors) .
-            ' miners who should have received an invoice but did not'
-        );
+        Log::info('RegenerateInvoices: found miners who should have received an invoice but did not', [ 'count' => count($debtors) ]);
         $delay_counter = 0;
 
         foreach ($debtors as $miner) {
             GenerateInvoice::dispatch($miner->eve_id, $delay_counter * 20);
-            Log::info(
-                'RegenerateInvoices: dispatched job to generate invoice for miner ' . $miner->eve_id .
-                ' and send mail ' . ($delay_counter * 20) . ' seconds later'
-            );
+            Log::info('RegenerateInvoices: dispatched job to generate invoice', [
+                'char_id' => $miner->eve_id,
+                'delay_secs' => ($delay_counter * 20),
+            ]);
             $delay_counter++;
         }
-
     }
 }

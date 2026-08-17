@@ -23,7 +23,7 @@ class ExtractionsController extends Controller
         $page = (int)$request->get('page', 1);
         $offset = $page > 1 ? ($page - 1) * $limit : 0;
         $corporation = (int)$request->get('corporation');
-        $corporationId = $corporation > 0 ? $corporation : env('TAX_CORPORATION_ID');
+        $corporationId = $corporation > 0 ? $corporation : config('eve.tax_corporation_id');
         $moonId = (int)$request->get('moon');
 
         // All moons with detonations from the selected corporation
@@ -128,8 +128,8 @@ class ExtractionsController extends Controller
         }
 
         return view('moons.extractions', [
-            'corporationTax' => env('TAX_CORPORATION_ID'),
-            'corporationRent' => env('RENT_CORPORATION_ID'),
+            'corporationTax' => config('eve.tax_corporation_id'),
+            'corporationRent' => config('eve.rent_corporation_id'),
             'corporationId' => $corporationId,
             'moonId' => $moonId,
             'moons' => $moons,

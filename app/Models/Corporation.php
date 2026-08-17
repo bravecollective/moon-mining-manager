@@ -28,6 +28,6 @@ class Corporation extends Model
 {
     public function refinery()
     {
-        return $this->hasMany('App\Models\Refinery');
+        return $this->hasMany(Refinery::class);
     }
 }

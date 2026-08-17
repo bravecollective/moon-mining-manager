@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   moon_php:
     build:
@@ -24,9 +22,12 @@ services:
   moon_db:
     image: mariadb:10.5
     ports: ['3307:3306']
-    volumes: [./db:/var/lib/mysql]
+    volumes: [moon_db_data:/var/lib/mysql]
     environment:
       MYSQL_DATABASE: moon_mining_manager
       MYSQL_USER: moon_mining_manager
       MYSQL_PASSWORD: moon
       MYSQL_ROOT_PASSWORD: moon
+
+volumes:
+  moon_db_data:

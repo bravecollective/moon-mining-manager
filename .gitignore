@@ -23,5 +23,13 @@ _ide_helper.php
 # VS COde
 .vscode/*
 
+# macOS
+.DS_Store
+
 # Local development overrides.
 docker-compose.override.yml
+
+# EVE static data SQL dumps
+/database/eve-static/*.sql
+/database/eve-static/*.bz2
+

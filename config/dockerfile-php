@@ -1,7 +1,7 @@
 FROM php:8.2-fpm-alpine
 
 RUN apk update
-RUN apk add --no-cache git gmp-dev
+RUN apk add --no-cache git gmp-dev mysql-client
 
 RUN docker-php-ext-install pdo_mysql gmp
 
