@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * App\Models\Moon
@@ -161,7 +163,7 @@ class Moon extends Model
     /**
      * Get the solar system where this moon is located.
      */
-    public function system()
+    public function system() : BelongsTo
     {
         return $this->belongsTo(SolarSystem::class, 'solar_system_id');
     }
@@ -169,7 +171,7 @@ class Moon extends Model
     /**
      * Get the region this moon is part of.
      */
-    public function region()
+    public function region() : BelongsTo
     {
         return $this->belongsTo(Region::class, 'region_id');
     }
@@ -177,7 +179,7 @@ class Moon extends Model
     /**
      * Get the renters of this moon.
      */
-    public function renter()
+    public function renter() : HasMany
     {
         return $this->hasMany(Renter::class, 'moon_id', 'id');
     }
@@ -206,22 +208,22 @@ class Moon extends Model
     /**
      * Get the mineral type object for each of the possible mineral types.
      */
-    public function mineral_1()
+    public function mineral_1() : BelongsTo
     {
         return $this->belongsTo(Type::class, 'mineral_1_type_id');
     }
 
-    public function mineral_2()
+    public function mineral_2() : BelongsTo
     {
         return $this->belongsTo(Type::class, 'mineral_2_type_id');
     }
 
-    public function mineral_3()
+    public function mineral_3() : BelongsTo
     {
         return $this->belongsTo(Type::class, 'mineral_3_type_id');
     }
 
-    public function mineral_4()
+    public function mineral_4() : BelongsTo
     {
         return $this->belongsTo(Type::class, 'mineral_4_type_id');
     }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * App\Models\Extraction
@@ -46,32 +47,32 @@ class Extraction extends Model
 {
     public $timestamps = false;
 
-    public function invMoon()
+    public function invMoon() : BelongsTo
     {
         return $this->belongsTo(UniqueNames::class, 'moon_id');
     }
 
-    public function refinery()
+    public function refinery() : BelongsTo
     {
         return $this->belongsTo(Refinery::class, 'refinery_id', 'observer_id');
     }
 
-    public function ore1()
+    public function ore1() : BelongsTo
     {
         return $this->belongsTo(Type::class, 'ore1_type_id');
     }
 
-    public function ore2()
+    public function ore2() : BelongsTo
     {
         return $this->belongsTo(Type::class, 'ore2_type_id');
     }
 
-    public function ore3()
+    public function ore3() : BelongsTo
     {
         return $this->belongsTo(Type::class, 'ore3_type_id');
     }
 
-    public function ore4()
+    public function ore4() : BelongsTo
     {
         return $this->belongsTo(Type::class, 'ore4_type_id');
     }
