@@ -107,7 +107,7 @@ class SendEvemail implements ShouldQueue
             $delay = rand(120, 180);
             SendEvemail::dispatch($this->mail)->delay(Carbon::now()->addMinutes($delay));
             Log::error('SendEvemail: bounceback due to MailStopSpamming, re-queued job to send mail in 2-3 hours', [
-                'recipient' => $this->mail['recipient'],
+                'recipients' => $this->mail['recipients'],
                 'delay_mins' => $delay,
             ]);
         } elseif (stripos($exception->getEsiResponse()->error, 'ContactOwnerUnreachable') !== false) {
@@ -125,7 +125,7 @@ class SendEvemail implements ShouldQueue
             $delay = 15;
             SendEvemail::dispatch($this->mail)->delay(Carbon::now()->addMinutes($delay));
             Log::info('SendEvemail: re-queued job to send later', [
-                'recipient' => $this->mail['recipient'],
+                'recipients' => $this->mail['recipients'],
                 'delay_mins'=> $delay,
             ]);
         }
