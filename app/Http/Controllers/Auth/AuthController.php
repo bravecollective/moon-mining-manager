@@ -58,7 +58,7 @@ class AuthController extends Controller
         // Find or create the user.
         $user = Socialite::driver($this->socialite_driver)->user();
         $authUser = $this->findOrCreateUser($user);
-        Log::info('AuthController: login attempt', ['name' => $authUser->name]);
+        Log::info('AuthController: login attempt', ['name' => $authUser->name, 'char_id' => $authUser->eve_id]);
 
         $esi = new EsiConnection;
         $conn = $esi->getConnection();
@@ -90,16 +90,21 @@ class AuthController extends Controller
             )
         ) {
             Auth::login($authUser, true);
-            Log::info('AuthController: login successful', ['name' => $authUser->name]);
+            Log::info('AuthController: login successful', ['name' => $authUser->name, 'char_id' => $authUser->eve_id]);
         } else {
-            Log::info('AuthController: login failed', ['name' => $authUser->name, 'reason' => 'alliance/corp match failed']);
+            Log::info('AuthController: login failed', [
+                'name' => $authUser->name,
+                'char_id' => $authUser->eve_id,
+                'corp_id' => $character->corporation_id,
+                'reason' => 'alliance/corp match failed',
+            ]);
             return redirect()->route('login');
         }
 
         // Check if the user is whitelisted to access the administrator area.
         $whitelist = Whitelist::where('eve_id', $authUser->eve_id)->first();
         if (isset($whitelist)) {
-            Log::info('AuthController: successful administrator login', ['name' => $authUser->name]);
+            Log::info('AuthController: successful administrator login', ['name' => $authUser->name, 'char_id' => $authUser->eve_id]);
             return redirect('/');
         } else {
             return redirect('/timers');
