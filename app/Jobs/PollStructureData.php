@@ -63,7 +63,7 @@ class PollStructureData implements ShouldQueue
         $refinery->corporation_id = $structure->owner_id;
         $refinery->save();
 
-        Log::info('PollStructureData: updated stored information about refinery ' . $this->structure_id);
+        Log::info('PollStructureData: updated refinery', ['structure_id'=> $this->structure_id]);
 
         // Check if we know the corporation already.
         $existingCorporation = Corporation::where('corporation_id', $refinery->corporation_id)->first();
@@ -78,7 +78,7 @@ class PollStructureData implements ShouldQueue
             $new_corporation->name = $corporation->name;
             $new_corporation->save();
 
-            Log::info('PollStructureData: stored new corporation ' . $corporation->name);
+            Log::info('PollStructureData: stored new corporation', ['corp_id' => $corporation->name]);
         }
     }
 }

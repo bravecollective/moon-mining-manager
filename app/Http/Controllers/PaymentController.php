@@ -47,8 +47,8 @@ class PaymentController extends Controller
                 ->with('message', 'Please choose a miner OR renter and add an amount <> 0.');
         }
 
+        $ctx = array();
         if ($miner_id > 0 && $amount !== 0) {
-
             // Create a record of the new payment.
             $payment = new Payment;
             $payment->miner_id = $miner_id;
@@ -61,12 +61,13 @@ class PaymentController extends Controller
             $miner->amount_owed -= $amount;
             $miner->save();
 
-            // Log the payment.
-            Log::info('PaymentController: payment of ' . number_format($amount) .
-                ' ISK manually submitted for miner ' . $miner_id . ' by ' . $user->eve_id);
-
-        } elseif ($rental_id > 0 && $amount !== 0) {
-
+            $ctx['type'] = 'tax';
+            $ctx['admin_id'] = $user->eve_id;
+            $ctx['amount'] = number_format($amount);
+            $ctx['char_id'] = $miner_id;
+        }
+        else if ($rental_id > 0 && $amount !== 0)
+        {
             // Grab a reference to the rental record.
             $renter = Renter::find($rental_id);
 
@@ -84,13 +85,16 @@ class PaymentController extends Controller
             $renter->save();
 
             // Log the payment.
-            Log::info(
-                'PaymentController: rental payment of ' . number_format($amount) .
-                ' ISK manually submitted for renter ' . $renter->character_id .
-                ' renting refinery ' . $renter->refinery_id . // refinery_id can be null
-                '/moon ' . $renter->moon_id . ' by ' . $user->eve_id
-            );
+            $ctx['type'] = 'rental';
+            $ctx['admin_id'] = $user->eve_id;
+            $ctx['amount'] = number_format($amount);
+            $ctx['char_id'] = $renter->character_id;
+            $ctx['refinery_id'] = $renter->refinery_id;
+            $ctx['moon_id'] = $renter->moon_id;
         }
+
+        // Log the payment.
+        Log::info('PaymentController: payment manually submitted', $ctx);
 
         return redirect('/payment');
     }

@@ -45,7 +45,7 @@ class PostSlackMessage implements ShouldQueue
                 ['body' => \json_encode($this->body)]
             );
         } catch (GuzzleException $e) {
-            Log::error('SlackMessage failed: ' . $e->getMessage());
+            Log::error('PostSlackMessage: failed', ['exception_message' => $e->getMessage()]);
             return;
         }
 

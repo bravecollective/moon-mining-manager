@@ -61,6 +61,7 @@ class ContactFormController extends Controller
         );
 
         SendEvemail::dispatch($mail);
+        Log::info('ContactFormController: dispatched evemail', [ 'recipients' => $recipients ]);
     }
 
     /**

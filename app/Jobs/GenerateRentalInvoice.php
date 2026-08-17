@@ -58,7 +58,7 @@ class GenerateRentalInvoice implements ShouldQueue
             $nameRented = trim($renter->getRentedName());
             if ($nameRented === null) {
                 // technically possible here, but should never happen
-                Log::warning("GenerateRentalInvoice: Renter $contractId without moon? skipping entry.");
+                Log::warning("GenerateRentalInvoice: Renter without moon? skipping entry.", ['contract_id' => $contractId]);
                 continue;
             }
 
@@ -98,10 +98,11 @@ class GenerateRentalInvoice implements ShouldQueue
             $invoice->amount = $invoice_amount;
             $invoice->save();
 
-            Log::info(
-                'GenerateRentalInvoice: invoiceed renter ' . $renter->character_id .
-                ' at refinery/moon ' . $nameRented . ' for amount ' . $invoice_amount
-            );
+            Log::info('GenerateRentalInvoice: invoice created', [
+                'char_id' => $renter->character_id,
+                'moon' => $nameRented,
+                'price' => $invoice_amount,
+            ]);
 
             $owedSum += $renter->amount_owed;
             $owed = number_format($renter->amount_owed);
@@ -160,8 +161,9 @@ class GenerateRentalInvoice implements ShouldQueue
 
         // Queue sending the EVE mail, spaced at 1 minute intervals to avoid triggering the mail spam limiter (4/min).
         SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($this->mail_delay));
-        Log::info('GenerateRentalInvoice: dispatched job to send mail in ' . $this->mail_delay . ' minutes', [
-            'mail' => $mail,
+        Log::info('GenerateRentalInvoice: dispatched job to send mail', [
+            'recipients' => $mail['recipients'],
+            'delay_mins' => $this->mail_delay,
         ]);
     }
 }

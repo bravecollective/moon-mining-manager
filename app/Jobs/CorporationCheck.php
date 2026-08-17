@@ -150,7 +150,7 @@ class CorporationCheck implements ShouldQueue
             }
 
             if (!$changed) {
-                Log::info('CorporationCheck: miner unchanged', $ctx);
+                Log::debug('CorporationCheck: miner unchanged', $ctx);
             } else {
                 $miner->save();
                 $changed_miners++;

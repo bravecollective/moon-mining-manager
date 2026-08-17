@@ -68,10 +68,9 @@ class PollExtractions implements ShouldQueue
 
         // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
         if ($this->page == 1 && $timers->pages > 1) {
-            Log::info(
-                'PollExtractions: found more than 1 page of timers, queuing additional jobs for ' .
-                $timers->pages . ' total pages'
-            );
+            Log::info('PollExtractions: more than 1 page found, queuing additional jobs', [
+                'pages' => $timers->pages,
+            ]);
             $delayCounter = 1;
             for ($i = 2; $i <= $timers->pages; $i++) {
                 PollExtractions::dispatch($this->user_id, $i)->delay(Carbon::now()->addMinutes($delayCounter));
@@ -87,9 +86,8 @@ class PollExtractions implements ShouldQueue
             $refinery->chunk_arrival_time = $this->convertTimestampFormat($timer->chunk_arrival_time);
             $refinery->natural_decay_time = $this->convertTimestampFormat($timer->natural_decay_time);
             $refinery->save();
-            Log::info('PollExtractions: saved current extraction timestamps for ' . $timer->structure_id);
+            Log::info('PollExtractions: saved current extraction timestamps', ['structure_id' => $timer->structure_id]);
         }
-
     }
 
     /**
@@ -102,5 +100,4 @@ class PollExtractions implements ShouldQueue
     {
         return str_replace('T', ' ', substr($timestamp, 0, 19));
     }
-
 }

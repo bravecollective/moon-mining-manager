@@ -39,28 +39,28 @@ class GenerateInvoices implements ShouldQueue
 
         // For all miners in your whitelisted alliances/corporations that currently
         // owe an outstanding balance, queue a job to generate and send an invoice.
-        $debtors = Miner::where('amount_owed', '>=', 1000)
+        $threshold = 1000;
+        $debtors = Miner::where('amount_owed', '>=', $threshold)
             ->whereRaw($whitelist_whereRaw)
             ->where('miners.updated_at', '>=', Carbon::now()->subYear())
             ->orderByDesc('miners.updated_at')
             ->orderBy('miners.eve_id')
             ->get();
-        Log::info(
-            'GenerateInvoices: found ' . count($debtors) .
-            ' miners with an outstanding balance over 1,000 ISK to be invoiced'
-        );
-        $delay_counter = 1;
 
+        Log::info('GenerateInvoices: miners with balance over threshold', [
+            'threshold' => $threshold,
+            'count' => count($debtors),
+        ]);
+
+        $delay_counter = 1;
         foreach ($debtors as $miner) {
             GenerateInvoice::dispatch($miner->eve_id, $delay_counter)
                 ->delay(Carbon::now()->addSeconds($delay_counter * 10));
-            Log::info(
-                'GenerateInvoices: dispatched job to generate invoice for miner ' . $miner->eve_id .
-                ' and send mail ' . $delay_counter . ' minutes later'
-            );
+            Log::debug('GenerateInvoices: dispatched job to generate invoice for miner', [
+                'char_id' => $miner->eve_id,
+                'delay_secs' => $delay_counter * 10,
+            ]);
             $delay_counter++;
         }
-
     }
-
 }

@@ -58,18 +58,20 @@ class PollRefinery implements ShouldQueue
     public function handle()
     {
         if (empty($this->corporation_id)) {
-            Log::error('PollRefinery:: called without corporation_id with observer_id ' . $this->observer_id);
+            Log::error('PollRefinery: called without corporation_id.', ['observer_id' => $this->observer_id]);
             return;
         }
 
         $esi = new EsiConnection;
 
-        Log::info('PollRefinery: requesting mining activity log for refinery ' .
-            $this->observer_id . ', page ' . $this->page);
+        Log::info('PollRefinery: requesting mining activity log for refinery', [
+            'observer_id' => $this->observer_id,
+            'page' => $this->page
+        ]);
 
         $userId = $esi->getPrimeUserOfCorporation($this->corporation_id);
         if ($userId === null) {
-            Log::error('PollRefinery:: Prime user not found for corporation ' . $this->corporation_id);
+            Log::error('PollRefinery: Prime user not found for corporation', ['corp_id' => $this->corporation_id]);
             return;
         }
 
@@ -83,8 +85,7 @@ class PollRefinery implements ShouldQueue
 
         // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
         if ($this->page == 1 && $activity_log->pages > 1) {
-            Log::info('PollRefinery: found more than 1 page of mining data, queuing additional jobs for ' .
-                $activity_log->pages . ' total pages');
+            Log::info('PollRefinery: found more than 1 page of mining data, queuing additional jobs', ['pages' => $activity_log->pages]);
             $delay_counter = 1;
             for ($i = 2; $i <= $activity_log->pages; $i++) {
                 PollRefinery::dispatch($this->observer_id, $this->corporation_id, $i)
@@ -93,7 +94,7 @@ class PollRefinery implements ShouldQueue
             }
         }
 
-        Log::info('PollRefinery: received ' . count($activity_log) . ' mining records');
+        Log::info('PollRefinery: received mining records', ['count' => count($activity_log)]);
 
         $new_mining_activity_records = array();
         $miner_ids = array();
@@ -136,9 +137,7 @@ class PollRefinery implements ShouldQueue
         //MiningActivity::insertIgnore($new_mining_activity_records);
         $ins = MiningActivity::insertOrIgnore($new_mining_activity_records);
 
-        Log::info(
-            'PollRefinery: inserted up to ' . count($new_mining_activity_records) . ' new mining activity records'
-        );
+        Log::info('PollRefinery: inserted new mining activity records', ['count' => count($new_mining_activity_records)]);
 
         // Check if this miner is already known.
         $delay_counter = 1;
@@ -146,7 +145,7 @@ class PollRefinery implements ShouldQueue
             $miner = Miner::where('eve_id', $miner_id)->first();
             // If not, create a job to add the new miner entry.
             if (!isset($miner)) {
-                Log::info('PollRefinery: unknown miner found, queuing job to retrieve details');
+                Log::info('PollRefinery: unknown miner found, queuing job to retrieve details', ['char_id'=>$miner_id]);
                 MinerCheck::dispatch($miner_id)->delay(Carbon::now()->addSeconds($delay_counter * 5));
                 $delay_counter++;
             }
@@ -164,10 +163,8 @@ class PollRefinery implements ShouldQueue
                 $tax_rate->tax_rate = 7;
                 $tax_rate->updated_by = 0;
                 $tax_rate->save();
-                Log::info('PollRefinery: unknown ore ' . $type_id . ' found, new tax rate record created');
+                Log::info('PollRefinery: unknown ore found, new tax rate record created', ['type_id' => $type_id, 'tax_rate' => 7]);
             }
         }
-
     }
-
 }

@@ -46,7 +46,7 @@ class SendRenterDelinquencyList implements ShouldQueue
             // Grab a reference to the refinery/moon that is being rented.
             $nameRented = $renter->getRentedName();
             if ($nameRented === null) {
-                Log::info("SendRenterDelinquencyList: Renter $renter->id without moon, aborting.");
+                Log::info('SendRenterDelinquencyList: Renter without moon, aborting.', ['char_id' => $renter->id]);
                 return;
             }
 
@@ -71,7 +71,7 @@ class SendRenterDelinquencyList implements ShouldQueue
         // Queue sending the evemail, spaced at 1 minute intervals to avoid triggering the mailspam limiter (4/min).
         SendEvemail::dispatch($mail);
         Log::info('SendRenterDelinquencyList: dispatched job to send mail', [
-            'mail' => $mail,
+            'recipient' => $mail['recipient'],
         ]);
     }
 }

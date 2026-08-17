@@ -38,7 +38,7 @@ class CalculateRent implements ShouldQueue
             $fee = $calc->updateMoon($moon, Renter::TYPE_ACTIVE);
             $corpFee = $calc->updateMoon($moon, Renter::TYPE_PASSIVE);
 
-            Log::info("CalculateRent: updated stored monthly rental fee for moon $moon->id to $fee/$corpFee");
+            Log::info('CalculateRent: updated rental fee', ['moon' => $moon->id, 'fee' => $fee, 'corp_fee' => $corpFee]);
 
             // Update the monthly rent figure if this moon is currently rented.
             DB::table('renters')

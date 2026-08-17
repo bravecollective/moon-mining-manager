@@ -73,8 +73,9 @@ class GenerateInvoice implements ShouldQueue
         // Queue sending the eve mail, spaced at 1-minute intervals to avoid triggering the
         // mail spam limiter (4/min) or database lockups.
         SendEvemail::dispatch($mail)->delay(Carbon::now()->addSeconds($this->mail_delay * 60));
-        Log::info('GenerateInvoice: dispatched job to send mail in ' . $this->mail_delay . ' minutes', [
-            'mail' => $mail,
+        Log::info('GenerateInvoice: dispatched job to send mail', [
+            'recipients' => $mail['recipients'],
+            'delay_mins' => $this->mail_delay,
         ]);
 
         // Write an invoice entry.
@@ -83,11 +84,9 @@ class GenerateInvoice implements ShouldQueue
         $invoice->amount = $miner->amount_owed;
         $invoice->save();
 
-        Log::info(
-            'GenerateInvoice: saved new invoice for miner ' . $miner->eve_id .
-            ' for amount ' . $miner->amount_owed
-        );
-
+        Log::info('GenerateInvoice: saved new invoice for miner', [
+            'char_id' => $miner->eve_id,
+            'amount' => $miner->amount_owed,
+        ]);
     }
-
 }
