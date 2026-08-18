@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\ConfigurationValidator;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        if (! App::runningUnitTests() && ! App::runningInConsole()) {
+            (new ConfigurationValidator())->validate(config('required'));
+        }
+
         if (App::environment() === 'production') {
             error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
         }
