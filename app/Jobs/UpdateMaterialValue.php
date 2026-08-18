@@ -53,10 +53,10 @@ class UpdateMaterialValue implements ShouldQueue
             'region_id' => $the_forge,
         ]);
 
-        Log::info(
-            'UpdateMaterialValue: pulled market history for material ' . $material->materialTypeID .
-            ', found ' . count($history) . ' days market data'
-        );
+        Log::info('UpdateMaterialValue: pulled market history', [
+            'material_id' => $material->materialTypeID,
+            'history_days' => count($history),
+        ]);
 
         // Loop the history, starting from the end and counting backwards.
         $weight = $rolling_day_average;
@@ -75,17 +75,19 @@ class UpdateMaterialValue implements ShouldQueue
         // Calculate the weighted average value of this item and save it.
         $material->average_price = $weighted_average / $weighted_total;
         $material->save();
-        Log::info(
-            'UpdateMaterialValue: calculated and saved the weighted average value for material ' .
-            $this->materialTypeID . ' as ' . number_format($material->average_price, 2) . ' ISK'
-        );
+        Log::info('UpdateMaterialValue: calculated and saved the weighted average value', [
+            'material_id' => $this->materialTypeID,
+            'wma_value' => number_format($material->average_price, 2) . ' ISK',
+        ]);
 
         // Save the new average value into the history table as well.
         $history = new ReprocessedMaterialsHistory;
         $history->type_id = $this->materialTypeID;
         $history->average_price = $weighted_average / $weighted_total;
         $history->save();
-        Log::info('UpdateMaterialValue: saved the historical value for material ' . $this->materialTypeID);
+        Log::info('UpdateMaterialValue: saved the historical value for material', [
+            'material_id' => $this->materialTypeID,
+        ]);
 
     }
 }

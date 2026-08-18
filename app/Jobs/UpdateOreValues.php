@@ -40,7 +40,7 @@ class UpdateOreValues implements ShouldQueue
             }
             $rate->value = $total_unit_cost / 100;
             $rate->save();
-            Log::info('UpdateOreValues: calculated and saved unit cost for ore ' . $rate->type_id);
+            Log::info('UpdateOreValues: calculated and saved unit cost for ore', ['type_id' => $rate->type_id]);
         }
     }
 }

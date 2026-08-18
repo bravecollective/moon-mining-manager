@@ -42,20 +42,16 @@ class RegenerateInvoices implements ShouldQueue
         $debtors = Miner::select('eve_id')->where('amount_owed', '>=', 1)->whereRaw($whitelist_whereRaw)
             ->whereRaw('eve_id NOT IN (SELECT miner_id FROM invoices WHERE DATE(created_at) = "' . $last_monday . '")')
             ->get();
-        Log::info(
-            'RegenerateInvoices: found ' . count($debtors) .
-            ' miners who should have received an invoice but did not'
-        );
+        Log::info('RegenerateInvoices: found miners who should have received an invoice but did not', [ 'count' => count($debtors) ]);
         $delay_counter = 0;
 
         foreach ($debtors as $miner) {
             GenerateInvoice::dispatch($miner->eve_id, $delay_counter * 20);
-            Log::info(
-                'RegenerateInvoices: dispatched job to generate invoice for miner ' . $miner->eve_id .
-                ' and send mail ' . ($delay_counter * 20) . ' seconds later'
-            );
+            Log::info('RegenerateInvoices: dispatched job to generate invoice', [
+                'char_id' => $miner->eve_id,
+                'delay_secs' => ($delay_counter * 20),
+            ]);
             $delay_counter++;
         }
-
     }
 }

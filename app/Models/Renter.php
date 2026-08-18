@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -52,6 +53,22 @@ class Renter extends Model
     const TYPE_PASSIVE = 'corporation';
 
     protected $table = 'renters';
+
+    /**
+     * Limit to rentals running today: started, and either open ended or not yet expired.
+     *
+     * This is the same test Moon::getActiveRenterAttribute() applies in PHP. Change both together.
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        $today = gmdate('Y-m-d');
+
+        return $query
+            ->where('start_date', '<=', $today)
+            ->where(function (Builder $window) use ($today) {
+                $window->whereNull('end_date')->orWhere('end_date', '>=', $today);
+            });
+    }
 
     /**
      * Get the refinery being rented.

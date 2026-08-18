@@ -7,18 +7,34 @@
     <div class="row">
 
         <div class="col-12">
+            <form method="get" action="/miners" class="external-filters">
+                <label for="miner-search">Search miners</label>
+                <input
+                    type="search"
+                    id="miner-search"
+                    name="search"
+                    value="{{ $search }}"
+                    placeholder="Name or character ID"
+                >
+                <button type="submit">Search</button>
+                @if ($search !== '')
+                    <a href="/miners">Clear</a>
+                @endif
+            </form>
             <table id="miners">
                 <thead>
-                    <th>Miner</th>
-                    <th>Corporation</th>
-                    <th class="numeric">Amount owed</th>
-                    <th class="numeric">Total payments</th>
-                    <th>Last mining date</th>
-                    <th>Last invoice date</th>
-                    <th>Last payment date</th>
+                    <tr>
+                        @include('miners._sortable-header', ['column' => 'name', 'label' => 'Miner'])
+                        @include('miners._sortable-header', ['column' => 'corporation', 'label' => 'Corporation'])
+                        @include('miners._sortable-header', ['column' => 'amount_owed', 'label' => 'Amount owed', 'class' => 'numeric'])
+                        @include('miners._sortable-header', ['column' => 'total_payments', 'label' => 'Total payments', 'class' => 'numeric'])
+                        @include('miners._sortable-header', ['column' => 'latest_mining_activity', 'label' => 'Last mining date'])
+                        @include('miners._sortable-header', ['column' => 'latest_invoice', 'label' => 'Last invoice date'])
+                        @include('miners._sortable-header', ['column' => 'latest_payment', 'label' => 'Last payment date'])
+                    </tr>
                 </thead>
                 <tbody>
-                    @foreach ($miners as $miner)
+                    @forelse ($miners as $miner)
                         <tr>
                             <td><a href="/miners/{{ $miner->eve_id }}">{{ $miner->name }}</a></td>
                             <td>
@@ -42,7 +58,11 @@
                                 @endif
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7">No miners match your search.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
             {{ $miners->links() }}
@@ -53,9 +73,10 @@
     <script>
 
         window.addEventListener('load', function () {
-            $('#miners').tablesorter();
-            $('#miners tr').on('click', function () {
-                $(this).find('a')[0].click();
+            $('#miners tbody tr').on('click', function (event) {
+                if ($(event.target).closest('a').length === 0) {
+                    $(this).find('a')[0].click();
+                }
             });
         });
 

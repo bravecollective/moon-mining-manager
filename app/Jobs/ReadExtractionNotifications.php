@@ -47,7 +47,9 @@ class ReadExtractionNotifications implements ShouldQueue
         } catch (\Throwable $e) {
             if (strpos($e->getMessage(), 'esi-characters.read_notifications.v1') !== false) {
                 // token is not valid for scope
-                Log::warning('ReadExtractionNotifications: ' . $e->getMessage());
+                Log::warning('ReadExtractionNotifications: exception thrown', [
+                    'message' => $e->getMessage()
+                ]);
                 return;
             }
             throw $e;

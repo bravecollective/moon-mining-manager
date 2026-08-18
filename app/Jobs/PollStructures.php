@@ -50,7 +50,7 @@ class PollStructures implements ShouldQueue
     {
         $esi = new EsiConnection;
 
-        Log::info('PollStructures: requesting corporation structures, page ' . $this->page);
+        Log::info('PollStructures: requesting corporation structures', ['page' => $this->page]);
 
         // Request all corporation structures of the prime user's corporation.
         $structures = $esi->getConnection($this->user_id)->setQueryString([
@@ -61,10 +61,7 @@ class PollStructures implements ShouldQueue
 
         // If this is the first page request, we need to check for multiple pages and generate subsequent jobs.
         if ($this->page == 1 && $structures->pages > 1) {
-            Log::info(
-                'PollStructures: found more than 1 page of corporation structures, queuing additional jobs for ' .
-                $structures->pages . ' total pages'
-            );
+            Log::info('PollStructures: found more than 1 page of corporation structures, queuing additional jobs', ['pages' => $structures->pages]);
             $delay_counter = 1;
             for ($i = 2; $i <= $structures->pages; $i++) {
                 PollStructures::dispatch($this->user_id, $i)->delay(Carbon::now()->addMinutes($delay_counter));
@@ -88,7 +85,7 @@ class PollStructures implements ShouldQueue
                     $refinery->observer_type = 'structure';
                     $refinery->corporation_id = $structure->corporation_id;
                     $refinery->save();
-                    Log::info('PollStructures: created new refinery record for ' . $structure->structure_id);
+                    Log::info('PollStructures: created new refinery record', ['structure_id' => $structure->structure_id]);
                 }
 
                 // Create a new job to fetch or update the parts we don't get from this response,

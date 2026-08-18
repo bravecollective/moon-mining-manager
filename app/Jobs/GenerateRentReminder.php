@@ -53,7 +53,7 @@ class GenerateRentReminder implements ShouldQueue
         // Grab a reference to the refinery/moon that is being rented.
         $nameRented = $renter->getRentedName();
         if ($nameRented === null) {
-            Log::info("GenerateRentReminder: Renter $renter->id without moon, aborting.");
+            Log::info('GenerateRentReminder: Renter without moon, aborting.', ['char_id' => $renter->id]);
             return;
         }
 
@@ -89,8 +89,9 @@ class GenerateRentReminder implements ShouldQueue
 
         // Queue sending the evemail, spaced at 1 minute intervals to avoid triggering the mailspam limiter (4/min).
         SendEvemail::dispatch($mail)->delay(Carbon::now()->addMinutes($this->mail_delay));
-        Log::info('GenerateRentReminder: dispatched job to send mail in ' . $this->mail_delay . ' minutes', [
-            'mail' => $mail,
+        Log::info('GenerateRentReminder: dispatched job to send mail', [
+            'recipients' => $mail['recipients'],
+            'delay_mins' => $this->mail_delay,
         ]);
     }
 }

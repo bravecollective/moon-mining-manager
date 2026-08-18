@@ -55,10 +55,11 @@ class GenerateRentalInvoices implements ShouldQueue
             // Queue jobs to create and send the individual invoices.
             GenerateRentalInvoice::dispatch($renter['contracts'], $delay_counter)
                 ->delay(Carbon::now()->addSeconds($delay_counter * 10));
-            Log::info(
-                'GenerateRentalInvoices: dispatched job to generate invoice for renter ' .
-                $renter['name'] . ' and send mail in ' . $delay_counter . ' minutes'
-            );
+            Log::info('GenerateRentalInvoices: dispatched job to generate invoice for renter', [
+                'renter_name' => $renter['name'],
+                'char_id' => $renter['character_id'],
+                'delay_mins' => $delay_counter,
+            ]);
             $delay_counter++;
         }
     }

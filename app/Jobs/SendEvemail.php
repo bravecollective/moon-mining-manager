@@ -40,10 +40,7 @@ class SendEvemail implements ShouldQueue
     {
         $userId = config('eve.mail_user_id');
         if ($userId <= 0) {
-            Log::error(
-                'SendEvemail: cannot send mail to character ' .
-                $this->mail['recipients'][0]['recipient_id'] . ', MAIL_USER_ID not set'
-            );
+            Log::error('SendEvemail: MAIL_USER_ID not set');
             return;
         }
 
@@ -54,10 +51,12 @@ class SendEvemail implements ShouldQueue
             'character_id' => $userId,
         ]);
 
-        Log::info(
-            'SendEvemail: sent evemail to character ' . $this->mail['recipients'][0]['recipient_id'] .
-            (count($this->mail['recipients']) > 1 ? ' and ' . (count($this->mail['recipients']) - 1) . ' more.' : '')
-        );
+        $recipients = array();
+        foreach ($this->mail['recipients'] as $recipient) {
+            array_push($recipients, $recipient['recipient_id']);
+        }
+
+        Log::debug('SendEvemail: sent evemail to character(s)', [ 'mail' => $this->mail ]);
     }
 
     /**
@@ -67,7 +66,7 @@ class SendEvemail implements ShouldQueue
     {
         if (!$exception instanceof RequestFailedException) {
             // e.g. EsiScopeAccessDeniedException or something else
-            Log::error('SendEvemail: ' . $exception->getMessage());
+            Log::error('SendEvemail: request failed', ['message' => $exception->getMessage()]);
             return;
         }
 
@@ -87,9 +86,9 @@ class SendEvemail implements ShouldQueue
         ) {
             // We somehow have triggered the error rate limiter,
             // stop requeueing jobs until we can figure out what broke. :(
-            Log::info(
-                'SendEvemail: bounceback due to hitting the error rate limiter, dumping email job to ' .
-                ($this->mail['recipients'][0]['recipient_id'] ?? 'none')
+            Log::error('SendEvemail: bounceback due to hitting the error rate limiter, dropping job', [
+                'char_id' => ($this->mail['recipients'][0]['recipient_id'] ?? 'none'),
+            ]
             );
             mail(
                 config('eve.admin_email'),
@@ -100,30 +99,35 @@ class SendEvemail implements ShouldQueue
             );
         } elseif (stristr($exception->getEsiResponse()->error, 'ContactCostNotApproved')) {
             // We want to ignore CSPA charge related errors, since they will never send successfully.
-            Log::info(
-                'SendEvemail: bounceback due to ContactCostNotApproved, dumping email job to ' .
-                ($this->mail['recipients'][0]['recipient_id'] ?? 'none')
-            );
+            Log::error('SendEvemail: bounceback due to ContactCostNotApproved, dropping job', [
+                'char_id'=>($this->mail['recipients'][0]['recipient_id'] ?? 'none'),
+            ]);
         } elseif (stristr($exception->getEsiResponse()->error, 'MailStopSpamming')) {
             // If we triggered the anti-spam rate limiter, we want to try again in a few hours.
             $delay = rand(120, 180);
             SendEvemail::dispatch($this->mail)->delay(Carbon::now()->addMinutes($delay));
-            Log::info('SendEvemail: bounceback due to MailStopSpamming, re-queued job to send mail in 2-3 hours');
+            Log::error('SendEvemail: bounceback due to MailStopSpamming, re-queued job to send mail in 2-3 hours', [
+                'recipients' => $this->mail['recipients'],
+                'delay_mins' => $delay,
+            ]);
         } elseif (stripos($exception->getEsiResponse()->error, 'ContactOwnerUnreachable') !== false) {
-            Log::info(
-                'SendEvemail: ContactOwnerUnreachable (receiver blocked sender), dumping email job to ' .
-                ($this->mail['recipients'][0]['recipient_id'] ?? 'none')
-            );
+            Log::error('SendEvemail: ContactOwnerUnreachable (receiver blocked sender), dropping job', [
+                'char_id' => ($this->mail['recipients'][0]['recipient_id'] ?? 'none'),
+            ]);
         } elseif (stripos($exception->getEsiResponse()->error, 'bad recipient') !== false) {
-            Log::info(
-                'SendEvemail: ' . $exception->getEsiResponse()->error . ', dumping email job. ' .
-                'Recipients: ' . json_encode($this->mail['recipients']) . ', ' .
-                'Subject: ' . $this->mail['subject']
-            );
+            Log::error('SendEvemail: bad recipient, dumping email job', [
+                'recipients' => json_encode($this->mail['recipients']),
+                'subject' => $this->mail['subject'],
+                'error' => $exception->getEsiResponse()->error,
+            ]);
         } else {
             // Send failed for some other reason (for example downtime), try again in a while.
-            SendEvemail::dispatch($this->mail)->delay(Carbon::now()->addMinutes(15));
-            Log::info('SendEvemail: re-queued job to send mail in 15 minutes');
+            $delay = 15;
+            SendEvemail::dispatch($this->mail)->delay(Carbon::now()->addMinutes($delay));
+            Log::info('SendEvemail: re-queued job to send later', [
+                'recipients' => $this->mail['recipients'],
+                'delay_mins'=> $delay,
+            ]);
         }
     }
 }

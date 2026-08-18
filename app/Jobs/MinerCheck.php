@@ -48,7 +48,6 @@ class MinerCheck implements ShouldQueue
 
         // If not, create a new entry, including pulling additional information.
         if (!isset($existing_miner)) {
-            Log::info('MinerCheck: new miner ' . $this->miner_id . ' found, creating new record');
             $miner = new Miner;
             $miner->eve_id = $this->miner_id;
             $character = $conn->invoke('get', '/characters/{character_id}/', [
@@ -61,43 +60,52 @@ class MinerCheck implements ShouldQueue
             ])->invoke('post', '/characters/affiliation/');
             $affiliations = current($req->getArrayCopy());
             $miner->corporation_id = $affiliations->corporation_id;
+            if (isset($affiliations->alliance_id)) {
+                $miner->alliance_id = $affiliations->alliance_id;
+            }
 
             $portrait = $conn->invoke('get', '/characters/{character_id}/portrait/', [
                 'character_id' => $this->miner_id,
             ]);
             $miner->avatar = $portrait->px128x128;
-            $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
-                'corporation_id' => $affiliations->corporation_id,
-            ]);
-            if (isset($corporation->alliance_id)) {
-                $miner->alliance_id = $corporation->alliance_id;
-            }
-            $miner->save();
-            Log::info('MinerCheck: saved new miner ' . $miner->eve_id . ' from corporation ' . $miner->corporation_id);
+
             // Also retrieve the corporation and alliance names for use in reporting.
             $existing_corporation = Corporation::where('corporation_id', $affiliations->corporation_id)->first();
             if (!isset($existing_corporation)) {
+                $corporation = $conn->invoke('get', '/corporations/{corporation_id}/', [
+                    'corporation_id' => $affiliations->corporation_id,
+                ]);
+
                 $new_corporation = new Corporation;
                 $new_corporation->corporation_id = $affiliations->corporation_id;
                 $new_corporation->name = $corporation->name;
                 $new_corporation->save();
-                Log::info('MinerCheck: stored new corporation ' . $affiliations->corporation_id);
+                Log::info('MinerCheck: stored new corporation', [
+                    'corp_name' => $corporation->name,
+                    'corp_id' => $affiliations->corporation_id,
+                ]);
             }
-            if (isset($corporation->alliance_id)) {
-                $existing_alliance = Alliance::where('alliance_id', $corporation->alliance_id)->first();
+
+            if (isset($affiliations->alliance_id)) {
+                $existing_alliance = Alliance::where('alliance_id', $affiliations->alliance_id)->first();
                 if (!isset($existing_alliance)) {
-                    $new_alliance = new Alliance;
-                    $new_alliance->alliance_id = $corporation->alliance_id;
                     $alliance = $conn->invoke('get', '/alliances/{alliance_id}/', [
-                        'alliance_id' => $corporation->alliance_id,
+                        'alliance_id' => $affiliations->alliance_id,
                     ]);
+
+                    $new_alliance = new Alliance;
+                    $new_alliance->alliance_id = $affiliations->alliance_id;
                     $new_alliance->name = $alliance->name;
                     $new_alliance->save();
-                    Log::info('MinerCheck: stored new alliance ' . $corporation->alliance_id);
+                    Log::info('MinerCheck: stored new alliance', [
+                        'alliance_name' => $alliance->name,
+                        'alliance_id' => $affiliations->alliance_id,
+                    ]);
                 }
             }
+
+            $miner->save();
+            Log::info('MinerCheck: saved new miner', ['char_id' => $miner->eve_id, 'corp_id' => $miner->corporation_id, 'alliance_id' => $miner->alliance_id]);
         }
-
     }
-
 }

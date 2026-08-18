@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 //use jdavidbakr\ReplaceableModel\ReplaceableModel;
 
 /**
@@ -47,7 +49,7 @@ class MiningActivity extends Model
     /**
      * Get the miner record associated with the activity.
      */
-    public function miner()
+    public function miner() : BelongsTo
     {
         return $this->belongsTo(Miner::class);
     }
@@ -55,7 +57,7 @@ class MiningActivity extends Model
     /**
      * Get the refinery record associated with the activity.
      */
-    public function refinery()
+    public function refinery() : BelongsTo
     {
         return $this->belongsTo(Refinery::class, 'refinery_id', 'observer_id');
     }
@@ -63,9 +65,8 @@ class MiningActivity extends Model
     /**
      * Get the type record associated with the activity.
      */
-    public function type()
+    public function type() : BelongsTo
     {
         return $this->belongsTo(Type::class, 'type_id', 'typeID');
     }
-
 }

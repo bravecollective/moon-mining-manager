@@ -26,7 +26,9 @@ class AdjustMoonRentalAmountsToInteger extends Migration
      */
     public function down()
     {
-        $table->decimal('monthly_rental_fee', 17, 2)->change();
-        $table->decimal('previous_monthly_rental_fee', 17, 2)->change();
+        Schema::table('moons', function (Blueprint $table) {
+            $table->decimal('monthly_rental_fee', 17, 2)->change();
+            $table->decimal('previous_monthly_rental_fee', 17, 2)->change();
+        });
     }
 }

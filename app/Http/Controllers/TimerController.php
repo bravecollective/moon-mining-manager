@@ -125,11 +125,11 @@ class TimerController extends Controller
             }
         }
         $refinery->save();
-        Log::info(
-            'TimerController: detonation for refinery ' . $refinery->observer_id . ' claimed by ' . Auth::user()->name
-        );
+        Log::info('TimerController: refinery detonation claimed', [
+            'observer_id' => $refinery->observer_id,
+            'name' => Auth::user()->name,
+        ]);
         return redirect('/timers');
-
     }
 
     /**
@@ -157,11 +157,11 @@ class TimerController extends Controller
             $refinery->custom_detonation_time = NULL;
         }
         $refinery->save();
-        Log::info(
-            'TimerController: detonation for refinery ' .  $refinery->observer_id .
-            ' no longer claimed by ' . Auth::user()->name
-        );
-        return redirect('/timers');
+        Log::info('TimerController: refinery detonation abandoned', [
+            'observer_id' => $refinery->observer_id,
+            'name' => Auth::user()->name,
+        ]);
 
+        return redirect('/timers');
     }
 }

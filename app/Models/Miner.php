@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -49,7 +51,7 @@ class Miner extends Model
     /**
      * Get the invoices for the miner.
      */
-    public function invoices()
+    public function invoices() : HasMany
     {
         return $this->hasMany(Invoice::class);
     }
@@ -57,7 +59,7 @@ class Miner extends Model
     /**
      * Get the payments for the miner.
      */
-    public function payments()
+    public function payments() : HasMany
     {
         return $this->hasMany(Payment::class);
     }
@@ -65,7 +67,7 @@ class Miner extends Model
     /**
      * Get the mining activity for the miner.
      */
-    public function mining_activity()
+    public function mining_activity() : HasMany
     {
         return $this->hasMany(MiningActivity::class);
     }
@@ -73,7 +75,7 @@ class Miner extends Model
     /**
      * Get the name of the alliance for this character.
      */
-    public function alliance()
+    public function alliance() : BelongsTo
     {
         return $this->belongsTo(Alliance::class, 'alliance_id', 'alliance_id')->withDefault([
             'name' => 'no alliance',
@@ -83,7 +85,7 @@ class Miner extends Model
     /**
      * Get the name of the corporation of this character.
      */
-    public function corporation()
+    public function corporation() : BelongsTo
     {
         return $this->belongsTo(Corporation::class, 'corporation_id', 'corporation_id');
     }
