@@ -103,12 +103,8 @@ class PollWallet implements ShouldQueue
 
             // Checks to see if this donation was already processed.
             $payment = Payment::where('ref_id', $ref_id)->first();
-            if ($payment) {
-                $pollNextPage = false;
-                continue;
-            }
             $rental_payment = RentalPayment::where('ref_id', $ref_id)->first();
-            if ($rental_payment) {
+            if ($payment || $rental_payment) {
                 $pollNextPage = false;
                 continue;
             }
@@ -134,7 +130,7 @@ class PollWallet implements ShouldQueue
 
             // Next, if this donation is actually from a recognised miner (and wasn't already processed).
             if ($payment_pool > 0.0 && $this->userId == config('eve.tax_corporation_prime_user_id') && isset($miner)) {
-                $this->processTaxes($transaction, $payment_pool, $miner, $date, $ref_id);
+                $payment_pool = $this->processTaxes($transaction, $payment_pool, $miner, $date, $ref_id);
             }
             if ($payment_pool > 0.0) {
                 Log::warning('PollWallet: transaction amount not entirely applied' . json_encode($transaction));
@@ -294,6 +290,7 @@ class PollWallet implements ShouldQueue
         }
 
         $this->dispatchMail($miner->name, $transaction, $miner->amount_owed, $miner->eve_id, 'tax');
+        return $payment_pool;
     }
 
     /**
