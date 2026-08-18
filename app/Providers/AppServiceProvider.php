@@ -18,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if (! App::runningUnitTests()) {
+        if (! App::runningUnitTests() && ! App::runningInConsole()) {
             (new ConfigurationValidator())->validate(config('required'));
         }
 
