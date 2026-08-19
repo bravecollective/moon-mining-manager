@@ -28,7 +28,6 @@ jobs:
 #       run: npm run build
 
       - name: Compress artifacts
-        id: artifact
         run: >
           tar czf moon-mining-manager-${{ github.ref_name }}.tar.gz
           app/
@@ -50,3 +49,5 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: moon-mining-manager-${{ github.ref_name }}.tar.gz
+          make_latest: ${{ !contains(github.ref_name, 'test') }}
+          prerelease: ${{ contains(github.ref_name, 'test') }}
