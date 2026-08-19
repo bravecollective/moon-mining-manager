@@ -10,21 +10,23 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout
+        uses: actions/checkout@v7
 
-      - name: Validate composer json/lock
+      - name: Composer validate
         run: composer validate --strict
 
       - name: Composer install
         run: composer install --no-dev --optimize-autoloader
 
-#     - run: npm ci
+#     - name: Node clean install
+#       run: npm ci
 
-#     - name: Build js
+#     - name: Node build
 #       run: npm run build
 
       - name: Compress artifacts
@@ -49,5 +51,4 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: moon-mining-manager-${{ github.ref_name }}.tar.gz
-          make_latest: ${{ !contains(github.ref_name, 'test') }}
-          prerelease: ${{ contains(github.ref_name, 'test') }}
+          draft: ${{ contains(github.ref_name, 'test') }}
