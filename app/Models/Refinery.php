@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * App\Models\Refinery
@@ -58,7 +60,7 @@ class Refinery extends Model
     /**
      * Get the mining activity for the refinery.
      */
-    public function mining_activity()
+    public function mining_activity() : HasMany
     {
         return $this->hasMany(MiningActivity::class, 'refinery_id', 'observer_id');
     }
@@ -66,7 +68,7 @@ class Refinery extends Model
     /**
      * Get the solar system record associated with the activity.
      */
-    public function system()
+    public function system() : BelongsTo
     {
         return $this->belongsTo(SolarSystem::class, 'solar_system_id');
     }
@@ -74,7 +76,7 @@ class Refinery extends Model
     /**
      * Get the user record for the primary detonation character.
      */
-    public function primary()
+    public function primary() : BelongsTo
     {
         return $this->belongsTo(User::class, 'claimed_by_primary', 'eve_id');
     }
@@ -82,12 +84,12 @@ class Refinery extends Model
     /**
      * Get the user record for the secondary detonation character.
      */
-    public function secondary()
+    public function secondary() : BelongsTo
     {
         return $this->belongsTo(User::class, 'claimed_by_secondary', 'eve_id');
     }
 
-    public function corporation()
+    public function corporation() : BelongsTo
     {
         return $this->belongsTo(Corporation::class, 'corporation_id', 'corporation_id');
     }
