@@ -27,45 +27,26 @@ jobs:
 #     - name: Build js
 #       run: npm run build
 
-#     - name: Compress artifacts
-#       run: >
-#         tar czf moon-mining-manager-$CI_COMMIT_TAG.tar.gz
-#         app/
-#         bootstrap/
-#         config/
-#         database/
-#         public/
-#         resources/
-#         routes/
-#         storage/
-#         vendor/
-#         .env.example
-#         LICENSE
-#         README.md
-#         artisan
-#         composer.json
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v7
+      - name: Compress artifacts
         id: artifact
-        with:
-          path: |
-            app/
-            bootstrap/
-            config/
-            database/
-            public/
-            resources/
-            routes/
-            storage/
-            vendor/
-            .env.example
-            LICENSE
-            README.md
-            artisan
-            composer.json
+        run: >
+          tar czf moon-mining-manager-${{ github.ref_name }}.tar.gz
+          app/
+          bootstrap/
+          config/
+          database/
+          public/
+          resources/
+          routes/
+          storage/
+          vendor/
+          .env.example
+          LICENSE
+          README.md
+          artisan
+          composer.json
 
       - name: Create release
         uses: softprops/action-gh-release@v3
         with:
-          files: ${{ steps.artifact.outputs.artifact-url }}
+          files: moon-mining-manager-${{ github.ref_name }}.tar.gz
