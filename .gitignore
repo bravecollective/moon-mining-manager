@@ -10,18 +10,17 @@ npm-debug.log
 .env.php
 .env
 
-# IDEs
+# IDEs & Tooling
+.vscode/
 .idea
 .phpstorm.meta.php
+.phpunit.result.cache
 _ide_helper.php
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
-
-# VS COde
-.vscode/*
 
 # macOS
 .DS_Store

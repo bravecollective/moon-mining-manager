@@ -1,3 +1,4 @@
+---
 name: Build Release
 
 on:
@@ -9,62 +10,51 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    runs-on: ubuntu-slim
+  build-and-release:
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout
+        uses: actions/checkout@v7
 
-      - name: Validate composer json/lock
+      - name: Composer validate
         run: composer validate --strict
 
       - name: Composer install
         run: composer install --no-dev --optimize-autoloader
 
-#     - run: npm ci
-
-#     - name: Build js
+# These may be required after merging the mix -> vite pr
+#     - name: Node clean install
+#       run: npm ci
+#     - name: Node build
 #       run: npm run build
 
-#     - name: Compress artifacts
-#       run: >
-#         tar czf moon-mining-manager-$CI_COMMIT_TAG.tar.gz
-#         app/
-#         bootstrap/
-#         config/
-#         database/
-#         public/
-#         resources/
-#         routes/
-#         storage/
-#         vendor/
-#         .env.example
-#         LICENSE
-#         README.md
-#         artisan
-#         composer.json
+      # used by ansible to skip deployment
+      - name: Create version file
+        run: echo '${{ github.ref_name }}' > VERSION
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v7
-        id: artifact
-        with:
-          path: |
-            app/
-            bootstrap/
-            config/
-            database/
-            public/
-            resources/
-            routes/
-            storage/
-            vendor/
-            .env.example
-            LICENSE
-            README.md
-            artisan
-            composer.json
+      - name: Compress artifacts
+        run: >
+          tar czf moon-mining-manager-${{ github.ref_name }}.tar.gz
+          app/
+          bootstrap/
+          config/
+          database/
+          public/
+          resources/
+          routes/
+          storage/
+          vendor/
+          .env.example
+          LICENSE
+          README.md
+          VERSION
+          artisan
+          composer.json
 
       - name: Create release
         uses: softprops/action-gh-release@v3
         with:
-          files: {{ steps.artifact.outputs.artifact-id }}
+          files: moon-mining-manager-${{ github.ref_name }}.tar.gz
+          prerelease: ${{ contains(github.ref_name, 'test') }}
+          generate_release_notes: ${{ !contains(github.ref_name, 'test') }}
