@@ -51,4 +51,4 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: moon-mining-manager-${{ github.ref_name }}.tar.gz
-          draft: ${{ contains(github.ref_name, 'test') }}
+          prerelease: ${{ contains(github.ref_name, 'test') }}
