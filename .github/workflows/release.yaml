@@ -23,9 +23,9 @@ jobs:
       - name: Composer install
         run: composer install --no-dev --optimize-autoloader
 
+# These may be required after merging the mix -> vite pr
 #     - name: Node clean install
 #       run: npm ci
-
 #     - name: Node build
 #       run: npm run build
 
@@ -57,3 +57,4 @@ jobs:
         with:
           files: moon-mining-manager-${{ github.ref_name }}.tar.gz
           prerelease: ${{ contains(github.ref_name, 'test') }}
+          generate_release_notes: ${{ !contains(github.ref_name, 'test') }}
