@@ -29,6 +29,10 @@ jobs:
 #     - name: Node build
 #       run: npm run build
 
+      # used by ansible to skip deployment
+      - name: Create version file
+        run: echo '${{ github.ref_name }}' > VERSION
+
       - name: Compress artifacts
         run: >
           tar czf moon-mining-manager-${{ github.ref_name }}.tar.gz
@@ -44,6 +48,7 @@ jobs:
           .env.example
           LICENSE
           README.md
+          VERSION
           artisan
           composer.json
 
