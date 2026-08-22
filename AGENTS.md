@@ -27,7 +27,7 @@ The app finds payments in the corporation wallet. It polls the wallet for ISK do
 ## 3. Architecture map
 
 - `app/Jobs/` holds 30 files and does most of the work. Plural and singular pairs are a fan-out convention. `PollRefineries` queues one `PollRefinery` for each refinery. `GenerateInvoices`/`GenerateInvoice`, `UpdateMaterialValues`/`UpdateMaterialValue` and `CorporationChecks`/`CorporationCheck` use the same shape. Keep that shape when you add work.
-- `app/Classes/` holds the only two service classes, `EsiConnection` and `CalculateRent`. `EsiConnection` is the single ESI entry point. Take an `Eseye` client from `EsiConnection::getConnection()` instead of building one.
+- `app/Classes/` holds the only two service classes, `EsiConnection` and `CalculateRent`. `EsiConnection` is the single ESI entry point. Call `EsiConnection::getConnection()` for the `Eseye` client. Do not create one with `new`.
 - `app/Console/Kernel.php` is the whole schedule. There are no event listeners. `EventServiceProvider` still carries the stock Laravel `$listen` entry for `App\Events\Event`. Neither that event nor its listener exists.
 - Controllers render Blade directly. There are no API routes, form requests, policies or resources. `routes/api.php` is the untouched Laravel stub.
 - `App\Models\Log` is an Eloquent model over the `logs` table, and nothing in the codebase references it today. `Illuminate\Support\Facades\Log` is the logger, and the code uses it everywhere. Read the imports before you touch either name.
@@ -41,15 +41,22 @@ The README covers installation. This section covers the three traps that it does
 2. **`eve:import-static-data` runs the `mysql` client binary through `Symfony\Component\Process`.** The `moon_php` image installs that binary, and a Windows host almost certainly does not have it. Run the command in the container.
 3. **`.env.example` ships `DB_HOST=moon_db`, which resolves inside the compose network only.** From the host, use `127.0.0.1:3307`, the port that `docker-compose.yml` publishes. Do not "fix" `.env.example`.
 
-After the static data import, `MOON_SEED_COUNT=1000 php artisan db:seed --class=MoonSeeder` gives you realistic data without a live ESI import. The seeder defaults to 100,000 moons, so set the variable unless you want that many. It truncates `moons` and `renters` first.
+After the static data import, `MOON_SEED_COUNT=1000 php artisan db:seed --class=MoonSeeder` gives you realistic data without a live ESI import. The seeder defaults to 100,000 moons, so set the variable unless you want that many. It deletes every row in `moons` and `renters` first.
 
 ## 5. Commands
 
-**Safe at any time:** `route:list`, `config:clear`, `ide-helper:models -N`, `php -l`, `tinker` for reads, `eve:import-static-data`, `db:seed --class=MoonSeeder`.
+**Safe at any time:** `route:list`, `config:clear`, `ide-helper:models -N`, `php -l`, `tinker` for reads, `eve:import-static-data`.
 
-**Ask first:** `migrate`. Also `queue:work`, which runs whatever sits in the queue already, including ESI jobs. Also `schedule:run`, which dispatches whatever the clock makes due. Also `db:seed`, because the default seeder truncates.
+**Ask first:**
 
-**Never run `php artisan command:run-job <AnyJob>`.** `RunJob::handle()` builds the class and calls `$job->handle()` directly. See `app/Console/Commands/RunJob.php:38-56`. The call is synchronous and unqueued. There is no dry-run and no confirmation. Against `Poll*`, `SendEvemail`, `GenerateInvoice*`, `GenerateRent*`, `SendRenterDelinquencyList`, `CorporationCheck*`, `UpdateMaterialValue*` or `PostSlackMessage`, that means real requests to the ESI of CCP under the real token of the corporation. It also means real in-game mail to real players, or a real Slack post. The README documents it as an operator command. It is not a development command. Do not offer it as a verification step.
+- `migrate`
+- `queue:work` — runs the jobs that already sit in the queue, including ESI jobs.
+- `schedule:run` — dispatches every job that is due now.
+- `db:seed --class=MoonSeeder` — deletes every row in `moons` and `renters`, then writes 100,000 moons. Set `MOON_SEED_COUNT` lower for a small set.
+
+Bare `db:seed` does nothing. `DatabaseSeeder::run()` is empty.
+
+**Never run `php artisan command:run-job <AnyJob>`.** `RunJob::handle()` creates the job object and calls `$job->handle()` directly. See `app/Console/Commands/RunJob.php:38-56`. The call is synchronous and unqueued. There is no dry-run and no confirmation. Against `Poll*`, `SendEvemail`, `GenerateInvoice*`, `GenerateRent*`, `SendRenterDelinquencyList`, `CorporationCheck*`, `UpdateMaterialValue*` or `PostSlackMessage`, that means real requests to the live ESI with the corporation's real token. It also means real in-game mail to real players, or a real Slack post. The README documents it as an operator command. It is not a development command. Do not offer it as a verification step.
 
 **Never run `migrate:fresh`, `migrate:refresh` or `db:wipe`.** They drop the five EVE static tables. Those tables have no migrations. The only way back is a new download and import of several hundred megabytes of SQL.
 
@@ -65,7 +72,7 @@ Treat this as a two-era codebase. That is the decision you face in every file yo
 
 The invariants, all visible in the tree:
 
-- PSR-12, with one house deviation that carries meaning. **Align `=>` in array literals and `=` in assignment blocks by hand**, as in `MoonController::SORTS` and `ImportEveStaticData::handle()`. Keep the alignment.
+- [PER-CS](https://www.php-fig.org/per/coding-style/), with one house deviation that carries meaning. **Align `=>` in array literals and `=` in assignment blocks by hand**, as in `MoonController::SORTS` and `ImportEveStaticData::handle()`. Keep the alignment.
 - The codebase today has zero `declare(strict_types=1)`, zero `final` classes, zero typed properties and zero enums. Do not add any of them to an unrelated change.
 - Eloquent relation methods use snake_case to match the attributes they front, such as `mineral_1()` and `mining_activity()`. This looks wrong and is intentional. A rename breaks eager-load strings and Blade property access silently.
 - Read config through `config('eve.*')`. Never call `env()` outside `config/`. The commit "refactor(env): fix issue #32 by using proper config" was a deliberate cleanup, so do not regress it. `MoonSeeder` reads `MOON_SEED_COUNT` directly, and that development fixture is the single exception.
@@ -84,7 +91,7 @@ Do not write:
 
 > Rule of thumb: if a comment would be equally true and equally useful in any other Laravel project, delete it.
 
-Diff hygiene. Do not reformat code or reorder imports in a file you do not otherwise change. Do not sweep whitespace or line endings. Do not rename or extract methods in a file you only pass through. Remove every `dd()`, `dump()` and `Log::info('here')` before you commit. Put unrelated problems you find in the pull request description, not in the diff. A reviewer must be able to read the whole diff in a couple of minutes. If yours is longer than that, split it.
+Diff hygiene. Do not reformat code or reorder imports in a file you do not otherwise change. Leave whitespace and line endings as they are. Do not rename or extract methods in a file you only pass through. Remove every `dd()`, `dump()` and `Log::info('here')` before you commit. Put unrelated problems you find in the pull request description, not in the diff. A reviewer must be able to read the whole diff in a couple of minutes. If yours is longer than that, split it.
 
 ## 8. Branches, commits, pull requests
 
