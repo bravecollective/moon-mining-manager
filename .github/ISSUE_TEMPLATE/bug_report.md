@@ -33,5 +33,5 @@ assignees: ''
 
 ## Logs
 
-<!-- Rows from the `logs` table, plus storage/logs/ if there is a stack trace.
-     Remove tokens and secrets. -->
+<!-- The relevant lines from storage/logs/laravel.log, with the stack trace if
+     there is one. Remove tokens and secrets. -->

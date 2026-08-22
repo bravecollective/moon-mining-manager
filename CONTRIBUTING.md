@@ -41,7 +41,7 @@ The exemption is narrow. These changes have no observable output and need no scr
 
 Everything else needs one. A diff that touches a Blade file, a controller that renders one, a query behind a rendered page, or any file under `resources/assets/` is not exempt.
 
-Work without an interface still gets shown. For a job, a console command or a schedule change, paste the output instead of a screenshot: the terminal output, the rows the job wrote, or the rows it added to the `logs` table.
+Work without an interface still gets shown. For a job, a console command or a schedule change, paste the output instead of a screenshot: the terminal output, the rows the job wrote, or the lines it added to `storage/logs/laravel.log`.
 
 ## Reaching a page in development
 
