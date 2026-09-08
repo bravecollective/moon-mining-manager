@@ -46,6 +46,17 @@
         </thead>
         <tbody>
         @foreach ($timers as $timer)
+            @php
+                $calendarQuery = http_build_query([
+                    'action' => 'TEMPLATE',
+                    'dates' => gmdate('Ymd\THis\Z', strtotime($timer->chunk_arrival_time)) . '/'
+                        . gmdate('Ymd\THis\Z', strtotime($timer->natural_decay_time)),
+                    'stz' => 'UTC',
+                    'etz' => 'UTC',
+                    'text' => 'Moon extraction window: ' . $timer->system->solarSystemName . ' - ' . $timer->name,
+                    'location' => $timer->system->solarSystemName . ', ' . $timer->system->region->regionName,
+                ], '', '&', PHP_QUERY_RFC3986);
+            @endphp
             <tr
                     @if (strtotime($timer->natural_decay_time) < time())
                         class="past"
@@ -73,6 +84,9 @@
                             <a href="http://time.nakamura-labs.com/?#{{ strtotime($timer->natural_decay_time) }}"
                                target="_blank">Timezone conversion</a>
                         @endif
+                        <br>
+                        <a href="https://calendar.google.com/calendar/r/eventedit?{{ $calendarQuery }}"
+                           target="_blank" rel="noopener noreferrer">Add window to Google Calendar</a>
                     </td>
                     @if ($is_whitelisted_user)
                         <td class="admin">
