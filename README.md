@@ -77,8 +77,6 @@ php artisan command:run-job PollStructures 2113076059
 ## Initial setup
 
 - Add your admin user to the table `whitelist` with `is_admin` = `1`. They can now log in and authorise other users.
-- Add the following mail templates to the table `templates`: `weekly_invoice`, `receipt`, `renter_invoice`,
-  `renter_notification`, `renter_reminder`.
 - Login at http://your.domain/admin with a director of your corporations to create the required ESI tokens. Add the
   IDs to the environment variables `*_PRIME_USER_ID`.
 - Login at http://your.domain/admin with a character that should be used to send mails and add the ID to the

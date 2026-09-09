@@ -8,9 +8,21 @@ use App\Models\Template;
 
 class EmailController extends Controller
 {
+    private const DEFAULT_TEMPLATE_NAMES = [
+        'weekly_invoice',
+        'receipt',
+        'renter_invoice',
+        'renter_notification',
+        'renter_reminder',
+    ];
 
     public function showEmails()
     {
+        Template::query()->insertOrIgnore(array_map(static fn (string $name): array => [
+            'name' => $name,
+            'subject' => '',
+            'body' => '',
+        ], self::DEFAULT_TEMPLATE_NAMES));
 
         return view('emails', [
             'templates' => Template::all(),
