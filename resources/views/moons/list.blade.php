@@ -17,14 +17,8 @@
                     @endforeach
                 </select>
 
-                <label for="system-filter">System:</label>
-                <input type="text" id="system-filter" class="external-filter search" data-column="2" placeholder="Search System">
-
-                <label for="system-filter">Renter:</label>
-                <input type="text" id="system-filter" class="external-filter search" data-column="9" placeholder="Search Renters">
-
-                <label for="mineral-filter">Minerals:</label>
-                <input type="text" id="mineral-filter" class="external-filter search" data-column="5" placeholder="Try: Cadmium|Cobalt">
+                <label for="moon-search">Search:</label>
+                <input type="text" id="moon-search" class="external-filter search" data-column="all" placeholder="Moon ID, system, renter, or mineral">
 
                 <label for="status-filter">Status:</label>
                 <select class="external-filter search" data-column="11">
