@@ -28,13 +28,13 @@ class EmailController extends Controller
             if (stristr($key, '__subject')) {
                 $template_name = str_replace('__subject', '', $key);
                 $template = Template::where('name', $template_name)->first();
-                $template->subject = $value;
+                $template->subject = $value ?? '';
                 $template->save();
             }
             if (stristr($key, '__body')) {
                 $template_name = str_replace('__body', '', $key);
                 $template = Template::where('name', $template_name)->first();
-                $template->body = $value;
+                $template->body = $value ?? '';
                 $template->save();
             }
         }
