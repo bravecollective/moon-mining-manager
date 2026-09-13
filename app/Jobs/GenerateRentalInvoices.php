@@ -57,7 +57,7 @@ class GenerateRentalInvoices implements ShouldQueue
                 ->delay(Carbon::now()->addSeconds($delay_counter * 10));
             Log::info('GenerateRentalInvoices: dispatched job to generate invoice for renter', [
                 'renter_name' => $renter['name'],
-                'char_id' => $renter['character_id'],
+                'char_id' => $renter['id'],
                 'delay_mins' => $delay_counter,
             ]);
             $delay_counter++;
